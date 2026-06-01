@@ -25,15 +25,18 @@ const register = async (req, res, next) => {
       });
     }
 
-    const { name, email, password } = req.body;
+    const emailStr = String(req.body.email).toLowerCase();
+    const passwordStr = String(req.body.password);
+    const nameStr = String(req.body.name);
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: emailStr });
     if (existingUser) {
       return next(new AppError('Unable to create account with the provided details', 400));
     }
 
-    const user = await User.create({ name, email, password });
+    const user = await User.create({ name: nameStr, email: emailStr, password: passwordStr });
     const token = generateToken(user._id);
+
 
     res.status(201).json({
       success: true,
@@ -69,16 +72,17 @@ const login = async (req, res, next) => {
       });
     }
 
-    const { identifier, password } = req.body;
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+    const safeIdentifier = String(req.body.identifier);
+    const passwordStr = String(req.body.password);
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeIdentifier);
 
     let user;
 
     if (isEmail) {
-      const emailLower = identifier.toLowerCase();
+      const emailLower = safeIdentifier.toLowerCase();
       user = await User.findOne({ email: emailLower }).select('+password +loginAttempts +lockUntil');
     } else {
-      const escapedName = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const escapedName = safeIdentifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       user = await User.findOne({
         name: { $regex: new RegExp(`^${escapedName}$`, 'i') }
       }).select('+password +loginAttempts +lockUntil');
@@ -92,7 +96,7 @@ const login = async (req, res, next) => {
       return next(new AppError('Account temporarily locked due to too many failed login attempts. Please try again in 15 minutes.', 423));
     }
 
-    const isAuthenticated = user.password ? await user.comparePassword(password) : false;
+    const isAuthenticated = user.password ? await user.comparePassword(passwordStr) : false;
 
     if (!isAuthenticated) {
       await user.incrementLoginAttempts();
@@ -140,8 +144,8 @@ const forgotPassword = async (req, res, next) => {
       });
     }
 
-    const { email } = req.body;
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const emailStr = String(req.body.email).toLowerCase();
+    const user = await User.findOne({ email: emailStr });
 
     if (!user) {
       return res.json({
@@ -153,7 +157,7 @@ const forgotPassword = async (req, res, next) => {
     const resetToken = user.createResetToken();
     await user.save({ validateBeforeSave: false });
 
-    logger.info(`Password reset token generated for ${email.replace(/(.{2}).*(@.*)/, '$1***$2')}`);
+    logger.info(`Password reset token generated for ${emailStr.replace(/(.{2}).*(@.*)/, '$1***$2')}`);
 
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
     const resetUrl = `${clientUrl}/reset-password?token=${resetToken}`;
@@ -204,11 +208,12 @@ const resetPassword = async (req, res, next) => {
       });
     }
 
-    const { token, password } = req.body;
+    const tokenStr = String(req.body.token);
+    const passwordStr = String(req.body.password);
 
     const hashedToken = crypto
       .createHash('sha256')
-      .update(token)
+      .update(tokenStr)
       .digest('hex');
 
     const user = await User.findOne({
