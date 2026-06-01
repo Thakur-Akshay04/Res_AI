@@ -49,7 +49,7 @@ const protect = async (req, res, next) => {
         'User';
 
       isClerk = true;
-    } catch (clerkErr) {
+    } catch {
       // Not a Clerk token — fall back to local JWT
       try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
