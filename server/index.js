@@ -89,8 +89,17 @@ if (process.env.NODE_ENV === 'production') {
     if (host.includes('localhost') || host.includes('127.0.0.1')) {
       return next();
     }
+
+    // Validate Host header against strict RFC-compliant regex to prevent Host Header Injection/Open Redirect
+    const isValidHost = /^[a-zA-Z0-9.-]+(?::\d+)?$/.test(host);
+
     if (req.headers['x-forwarded-proto'] !== 'https') {
-      return res.redirect(`https://${host}${req.url}`);
+      if (isValidHost) {
+        return res.redirect(`https://${host}${req.url}`);
+      } else {
+        logger.warn(`Blocked suspicious HTTP redirect attempt for invalid host: ${host}`);
+        return res.status(400).send('Bad Request: Invalid Host Header');
+      }
     }
     next();
   });
