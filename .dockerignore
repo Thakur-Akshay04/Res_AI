@@ -1,0 +1,17 @@
+**/node_modules
+.git
+.env
+.env.*
+!.env.docker
+logs
+*.log
+**/dist
+.dist
+Logo
+.DS_Store
+*.pdf
+.vscode
+.idea
+coverage
+build
+.gemini

@@ -1,0 +1,39 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Install Chromium for Puppeteer (PDF generation on Alpine) and metric-compatible fonts
+RUN apk add --no-cache \
+    chromium nss freetype harfbuzz ca-certificates \
+    ttf-freefont ttf-dejavu fontconfig font-liberation \
+    && fc-cache -f
+
+# Tell Puppeteer to use system Chromium instead of downloading its own
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copy package files first (better caching)
+COPY server/package.json server/pnpm-lock.yaml ./
+
+# Install all dependencies (including dev, needed for build scripts)
+# Use --no-optional to skip build scripts that fail; puppeteer will work because chromium is already installed
+RUN pnpm install --ignore-scripts
+
+# Run puppeteer postinstall separately (skip chromium download since we use system chromium)
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+
+# Copy server source code
+COPY server/ .
+
+# Expose backend port
+EXPOSE 5000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+  CMD wget --no-check-certificate --no-verbose --tries=1 --spider http://127.0.0.1:5000/api/health || exit 1
+
+# Start the server
+CMD ["node", "index.js"]

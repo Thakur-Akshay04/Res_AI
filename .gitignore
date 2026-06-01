@@ -1,0 +1,16 @@
+node_modules/
+.env
+.env.*
+!.env.example
+logs/
+*.log
+dist/
+.dist/
+Logo/
+.DS_Store
+*.pdf
+.vscode/
+.idea/
+coverage/
+build/
+.env.docker

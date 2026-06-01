@@ -1,0 +1,942 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CSS VARIABLES — Dark & Light Theme
+───────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Dark theme (High Contrast) */
+  --neu-bg: #000000;
+  --neu-bg-dark: #050505;
+  --neu-bg-panel: #141414;
+  --neu-bg-raise: #1f1f1f;
+  --neu-surface: rgba(255, 255, 255, 0.04);
+
+  --neu-text: #ffffff;
+  --neu-text-light: #a3a3a3;
+  --neu-text-muted: #737373;
+
+  --neu-primary: #ffffff;
+  --neu-primary-light: #f5f5f5;
+  --neu-primary-dark: #e5e5e5;
+  --neu-primary-glow: rgba(255, 255, 255, 0.15);
+  --neu-btn-primary-text: #000000;
+
+  --neu-secondary: #222222;
+  --neu-accent: #ffffff;
+
+  --neu-border: rgba(255, 255, 255, 0.15);
+  --neu-border-light: rgba(255, 255, 255, 0.08);
+
+  --neu-success: #10b981;
+  --neu-success-bg: rgba(16, 185, 129, 0.12);
+  --neu-success-border: rgba(16, 185, 129, 0.3);
+
+  --neu-warning: #f59e0b;
+  --neu-warning-bg: rgba(245, 158, 11, 0.12);
+  --neu-warning-border: rgba(245, 158, 11, 0.3);
+
+  --neu-danger: #ef4444;
+  --neu-danger-bg: rgba(239, 68, 68, 0.12);
+  --neu-danger-border: rgba(239, 68, 68, 0.3);
+
+  --neu-cyan: #22d3ee;
+  --neu-cyan-bg: rgba(8, 51, 68, 0.5);
+  --neu-cyan-border: rgba(6, 182, 212, 0.3);
+
+  --neu-indigo: #94a3b8;
+  --neu-indigo-bg: rgba(148, 163, 184, 0.1);
+  --neu-indigo-border: rgba(148, 163, 184, 0.2);
+
+  --neu-scrollbar-track: #000000;
+  --neu-scrollbar-thumb: #333333;
+
+  --resume-thumbnail-bg: #f7f5f0;
+  --resume-thumbnail-border: #e0dbd0;
+}
+
+/* Global Dark Mode Stars Pattern */
+html:not(.light) .bg-neu-bg {
+  background-image: radial-gradient(circle, rgba(245, 243, 243, 0.171) 1.5px, transparent 1.5px) !important;
+  background-size: 32px 32px !important;
+}
+
+/* Global Light Mode Dots Pattern */
+html.light .bg-neu-bg {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.15) 1.5px, transparent 1.5px) !important;
+  background-size: 32px 32px !important;
+}
+
+.light {
+  /* Light theme: High Contrast Soft Gray */
+  --neu-bg: #f0f2f5;
+  --neu-bg-dark: #e4e6eb;
+  --neu-bg-panel: #ffffff;
+  --neu-bg-raise: #ffffff;
+  --neu-surface: rgba(0, 0, 0, 0.03);
+
+  --neu-text: #111111;
+  --neu-text-light: #333333;
+  --neu-text-muted: #555555;
+
+  --neu-primary: #111111;
+  --neu-primary-light: #333333;
+  --neu-primary-dark: #000000;
+  --neu-primary-glow: rgba(0, 0, 0, 0.08);
+  --neu-btn-primary-text: #ffffff;
+
+  --neu-secondary: #e2e8f0;
+  --neu-accent: #111111;
+
+  --neu-border: rgba(40, 30, 25, 0.452);
+  --neu-border-light: rgba(40, 30, 25, 0.25);
+
+  --neu-success: #059669;
+  --neu-success-bg: rgba(5, 150, 105, 0.15);
+  --neu-success-border: rgba(5, 150, 105, 0.4);
+
+  --neu-warning: #d97706;
+  --neu-warning-bg: rgba(217, 119, 6, 0.15);
+  --neu-warning-border: rgba(217, 119, 6, 0.4);
+
+  --neu-danger: #dc2626;
+  --neu-danger-bg: rgba(220, 38, 38, 0.15);
+  --neu-danger-border: rgba(220, 38, 38, 0.4);
+
+  --neu-cyan: #475569;
+  --neu-cyan-bg: rgba(71, 85, 105, 0.08);
+  --neu-cyan-border: rgba(71, 85, 105, 0.25);
+
+  --neu-indigo: #64748b;
+  --neu-indigo-bg: rgba(100, 116, 139, 0.08);
+  --neu-indigo-border: rgba(100, 116, 139, 0.2);
+
+  --neu-scrollbar-track: #f7f4f1;
+  --neu-scrollbar-thumb: #d3ccc7;
+
+  --resume-thumbnail-bg: #fdfcfb;
+  --resume-thumbnail-border: #e2dbd6;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   INTELLIGENT DESIGN SYSTEM — AI Resume Builder
+   Deep navy foundation | Electric teal accents | Graph paper precision
+   Clean, professional, intelligent
+───────────────────────────────────────────────────────────────────────────── */
+
+@layer base {
+  body {
+    @apply bg-neu-bg text-neu-text font-sans antialiased;
+    min-height: 100vh;
+    overflow-x: hidden;
+    /* Subtle grain texture + solid black */
+    background-image:
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    background-color: var(--neu-bg);
+  }
+
+  /* Light theme body adjustments */
+  .light body {
+    background-color: var(--neu-bg);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+
+  ::selection {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--neu-text);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    @apply font-semibold tracking-tight;
+    color: var(--neu-text);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   COMPONENT LIBRARY — Intelligent Edition
+───────────────────────────────────────────────────────────────────────────── */
+@layer components {
+
+  /* ── Card ──────────────────────────────────────────────────────────────── */
+  .neu-card {
+    background: var(--neu-bg-panel);
+    border: 1px solid var(--neu-border);
+    @apply rounded-neu p-6;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04), 0 8px 32px rgba(0, 0, 0, 0.15);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    isolation: isolate;
+  }
+
+  .light .neu-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  .neu-card:hover {
+    border-color: var(--neu-primary);
+    box-shadow: 0 0 0 1px var(--neu-primary-glow), 0 12px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Radial glow on hover — dark mode only */
+  html:not(.light) .neu-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(ellipse 70% 55% at 50% 100%, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  html:not(.light) .neu-card:hover::after {
+    opacity: 1;
+  }
+
+  /* ── Resume Template Card (Dashboard) ───────────────────────────────────── */
+  .exec-resume-card {
+    background: var(--neu-bg-panel);
+    border: 1px solid var(--neu-border);
+    @apply rounded-neu overflow-hidden;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    isolation: isolate;
+  }
+
+  /* Top-left shimmer — always present layer */
+  .exec-resume-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 60%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    z-index: 0;
+  }
+
+  /* Radial glow — dark mode only */
+  html:not(.light) .exec-resume-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 110%, rgba(255, 255, 255, 0.08) 0%, transparent 65%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .exec-resume-card:hover {
+    border-color: var(--neu-primary);
+    box-shadow: 0 0 0 1px var(--neu-primary-glow), 0 8px 32px rgba(0, 0, 0, 0.25);
+    transform: translateY(-2px);
+  }
+
+  .exec-resume-card:hover::before {
+    opacity: 1;
+  }
+
+  html:not(.light) .exec-resume-card:hover::after {
+    opacity: 1;
+  }
+
+  /* ── Inset / Pressed ──────────────────────────────────────────────────── */
+  .neu-inset {
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--neu-border);
+    @apply rounded-neu p-4;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .light .neu-inset {
+    background: rgba(40, 30, 25, 0.03);
+    box-shadow: inset 0 2px 4px rgba(40, 30, 25, 0.06);
+  }
+
+  /* ── Flat Surface ──────────────────────────────────────────────────────── */
+  .neu-flat {
+    background: var(--neu-surface);
+    border: 1px solid var(--neu-border);
+    @apply rounded-neu;
+  }
+
+  /* ── Primary Button (Teal) ─────────────────────────────────────────────── */
+  .neu-btn-primary {
+    background: linear-gradient(135deg, var(--neu-primary-dark) 0%, var(--neu-primary) 100%);
+    border: 1px solid var(--neu-primary);
+    @apply rounded-neu px-6 py-3 font-bold text-[var(--neu-btn-primary-text)] cursor-pointer select-none;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1) inset, 0 4px 16px var(--neu-primary-glow);
+    transition: all 0.18s ease;
+    letter-spacing: 0.01em;
+  }
+
+  .neu-btn-primary:hover {
+    background: linear-gradient(135deg, var(--neu-primary) 0%, var(--neu-primary-light) 100%);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.12) inset, 0 6px 24px var(--neu-primary-glow);
+    transform: translateY(-1px);
+  }
+
+  .neu-btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px var(--neu-primary-glow);
+  }
+
+  .neu-btn-primary:disabled {
+    background: linear-gradient(135deg, var(--neu-secondary) 0%, var(--neu-bg-dark) 100%);
+    border-color: var(--neu-border);
+    @apply text-neu-text-muted cursor-not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* ── Ghost Button ──────────────────────────────────────────────────────── */
+  .neu-btn {
+    background: transparent;
+    border: 1px solid var(--neu-border);
+    @apply rounded-neu px-6 py-3 font-medium cursor-pointer select-none;
+    color: var(--neu-text-light);
+    transition: all 0.18s ease;
+    letter-spacing: 0.01em;
+  }
+
+  .neu-btn:hover {
+    background: var(--neu-primary-glow);
+    border-color: var(--neu-primary);
+    color: var(--neu-primary);
+  }
+
+  .neu-btn:active {
+    transform: translateY(1px);
+  }
+
+  /* ── Danger Button ─────────────────────────────────────────────────────── */
+  .neu-btn-danger {
+    background: linear-gradient(135deg, #991b1b 0%, #ef4444 100%);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    @apply rounded-neu px-6 py-3 font-semibold text-white cursor-pointer select-none;
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+    transition: all 0.18s ease;
+  }
+
+  .neu-btn-danger:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #f87171 100%);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.45);
+    transform: translateY(-1px);
+  }
+
+  /* ── Input ─────────────────────────────────────────────────────────────── */
+  .neu-input {
+    background: var(--neu-bg-raise);
+    border: 1px solid var(--neu-border);
+    @apply w-full rounded-neu px-4 py-3 outline-none transition-all duration-200 placeholder:text-neu-text-muted;
+    color: var(--neu-text);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .light .neu-input {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+  }
+
+  .neu-input:focus {
+    border-color: var(--neu-primary);
+    box-shadow: 0 0 0 2px var(--neu-primary-glow), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* ── Textarea ───────────────────────────────────────────────────────────── */
+  .neu-textarea {
+    background: var(--neu-bg-raise);
+    border: 1px solid var(--neu-border);
+    @apply w-full rounded-neu px-4 py-3 outline-none resize-none transition-all duration-200 placeholder:text-neu-text-muted;
+    color: var(--neu-text);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .light .neu-textarea {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+  }
+
+  .neu-textarea:focus {
+    border-color: var(--neu-primary);
+    box-shadow: 0 0 0 2px var(--neu-primary-glow), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* ── Badge ─────────────────────────────────────────────────────────────── */
+  .neu-badge {
+    background: var(--neu-surface);
+    border: 1px solid var(--neu-border);
+    @apply inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium tracking-wide;
+    color: var(--neu-text-light);
+  }
+
+  .neu-badge-success {
+    @apply neu-badge;
+    background: var(--neu-success-bg);
+    border-color: var(--neu-success-border);
+    color: var(--neu-success);
+  }
+
+  .neu-badge-danger {
+    @apply neu-badge;
+    background: var(--neu-danger-bg);
+    border-color: var(--neu-danger-border);
+    color: var(--neu-danger);
+  }
+
+  .neu-badge-primary {
+    @apply neu-badge;
+    background: var(--neu-primary-glow);
+    border-color: var(--neu-primary);
+    color: var(--neu-primary);
+  }
+
+  /* ── Circle / Icon Wrapper ─────────────────────────────────────────────── */
+  .neu-circle {
+    background: var(--neu-primary-glow);
+    border: 1px solid var(--neu-primary);
+    @apply flex items-center justify-center;
+  }
+
+  /* ── Progress Track ────────────────────────────────────────────────────── */
+  .neu-progress-track {
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--neu-border);
+    @apply h-1.5 overflow-hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .light .neu-progress-track {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .neu-progress-fill {
+    background: var(--neu-primary);
+    @apply h-full transition-all duration-1000 ease-out;
+  }
+
+  /* ── Skeleton ──────────────────────────────────────────────────────────── */
+  .neu-skeleton {
+    background: linear-gradient(90deg,
+        rgba(255, 255, 255, 0.03) 25%,
+        rgba(255, 255, 255, 0.07) 50%,
+        rgba(255, 255, 255, 0.03) 75%);
+    background-size: 200% 100%;
+    @apply animate-shimmer rounded;
+  }
+
+  .light .neu-skeleton {
+    background: linear-gradient(90deg,
+        rgba(0, 0, 0, 0.03) 25%,
+        rgba(0, 0, 0, 0.07) 50%,
+        rgba(0, 0, 0, 0.03) 75%);
+  }
+
+  /* ── Divider ──────────────────────────────────────────────────────── */
+  .exec-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    opacity: 0.4;
+  }
+
+  /* ── Section Label ─────────────────────────────────────────────────────── */
+  .exec-label {
+    @apply text-xs font-semibold tracking-widest uppercase;
+    color: var(--neu-primary);
+    letter-spacing: 0.15em;
+  }
+
+  /* ── Navigation Link ────────────────────────────────────────────────────── */
+  .exec-nav-link {
+    @apply flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-150 cursor-pointer select-none relative;
+    border-left: 2px solid transparent;
+    color: var(--neu-text-light);
+  }
+
+  .exec-nav-link:hover {
+    @apply bg-white/[0.03];
+    border-left-color: var(--neu-primary);
+    color: var(--neu-text);
+  }
+
+  .light .exec-nav-link:hover {
+    background: rgba(61, 51, 48, 0.03);
+  }
+
+  .exec-nav-link.active {
+    @apply bg-white/[0.04];
+    border-left-color: var(--neu-primary);
+    color: var(--neu-primary);
+  }
+
+  /* ── Code / Terminal Block ─────────────────────────────────────────────── */
+  .exec-terminal {
+    background: var(--neu-bg-dark);
+    border: 1px solid var(--neu-border);
+    border-left: 2px solid var(--neu-primary);
+    @apply rounded-neu p-4 font-mono text-sm;
+    color: var(--neu-text-light);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* ── ATS Score Badge (high contrast) ───────────────────────────────────── */
+  .exec-score-badge {
+    @apply inline-flex items-center justify-center font-bold text-xs tracking-wide;
+    min-width: 2.5rem;
+    padding: 2px 8px;
+    border-radius: 2px;
+  }
+
+  .exec-score-high {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #34d399;
+  }
+
+  .exec-score-mid {
+    background: var(--neu-primary-glow);
+    border: 1px solid var(--neu-primary);
+    color: var(--neu-primary);
+  }
+
+  .exec-score-low {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #f87171;
+  }
+
+  /* ── Switch ────────────────────────────────────────────────────────────── */
+  .neu-switch {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--neu-border);
+    @apply relative w-14 h-7 cursor-pointer transition-all duration-300;
+    border-radius: 2px;
+  }
+
+  .light .neu-switch {
+    background: rgba(61, 51, 48, 0.1);
+  }
+
+  .neu-switch-knob {
+    background: linear-gradient(135deg, var(--neu-primary-light), var(--neu-primary));
+    @apply absolute top-[3px] left-[3px] w-5 h-5 transition-all duration-300;
+    border-radius: 1px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   UTILITY OVERRIDES
+───────────────────────────────────────────────────────────────────────────── */
+@layer utilities {
+
+  /* Increase border thickness globally in light mode for clearer layout separation */
+  .light .border {
+    border-width: 2px !important;
+  }
+
+  .light .border-t {
+    border-top-width: 2px !important;
+  }
+
+  .light .border-b {
+    border-bottom-width: 2px !important;
+  }
+
+  .light .border-l {
+    border-left-width: 2px !important;
+  }
+
+  .light .border-r {
+    border-right-width: 2px !important;
+  }
+
+  /* Text gradient */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #ffffff 0%, #a3a3a3 100%);
+  }
+
+  .light .text-gradient {
+    background-image: linear-gradient(135deg, var(--neu-primary-dark) 0%, var(--neu-primary) 100%);
+  }
+
+  .text-gradient-warm {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #e5e5e5 0%, #737373 100%);
+  }
+
+  .light .text-gradient-warm {
+    background-image: linear-gradient(135deg, var(--neu-text) 0%, var(--neu-text-muted) 100%);
+  }
+
+  .neu-glow {
+    box-shadow: 0 0 0 1px var(--neu-primary-glow), 0 4px 16px var(--neu-primary-glow);
+  }
+
+  /* Cinematic top-light highlight on raised surfaces */
+  .exec-highlight {
+    border-top: 1px solid var(--neu-border-light);
+    border-left: 1px solid var(--neu-border);
+  }
+
+  /* Sharp tag — no radius */
+  .tag-sharp {
+    border-radius: 2px;
+  }
+
+  /* ── Custom scrollbar — apply .scrollbar-custom to containers ── */
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: var(--neu-scrollbar-track);
+    border-radius: 4px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: var(--neu-scrollbar-thumb);
+    border-radius: 4px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--neu-primary), var(--neu-primary-light));
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ATS GAUGE
+───────────────────────────────────────────────────────────────────────────── */
+.ats-gauge-circle {
+  transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   STREAMING CURSOR
+───────────────────────────────────────────────────────────────────────────── */
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+.streaming-cursor::after {
+  content: '▋';
+  animation: blink 0.8s infinite;
+  color: var(--neu-primary);
+  margin-left: 2px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SHIMMER KEYFRAME
+───────────────────────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CTA SHIMMER — Diagonal sweep on hover
+───────────────────────────────────────────────────────────────────────────── */
+@keyframes cta-shimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.animate-cta-shimmer {
+  animation: cta-shimmer 1s ease-in-out forwards;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FLOATING PARTICLES — AI Neural Network Vibe
+───────────────────────────────────────────────────────────────────────────── */
+@keyframes float-particle {
+
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.3;
+  }
+
+  25% {
+    transform: translateY(-20px) translateX(10px);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: translateY(-10px) translateX(-5px);
+    opacity: 0.4;
+  }
+
+  75% {
+    transform: translateY(-30px) translateX(15px);
+    opacity: 0.7;
+  }
+}
+
+.ai-particle {
+  animation: float-particle 8s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESUME THUMBNAIL (paper texture preview)
+───────────────────────────────────────────────────────────────────────────── */
+.resume-thumbnail {
+  background: var(--resume-thumbnail-bg);
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='0.06'/%3E%3C/svg%3E");
+  border: 1px solid var(--resume-thumbnail-border);
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 8.5 / 11;
+}
+
+.resume-thumbnail::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.03) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   REGISTER PAGE — ANIMATED GRADIENT
+───────────────────────────────────────────────────────────────────────────── */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   NEURAL NODE ANIMATION — Background decoration
+───────────────────────────────────────────────────────────────────────────── */
+@keyframes node-pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 0.6;
+  }
+}
+
+.neural-node {
+  animation: node-pulse 4s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   GLASSMORPHISM & TRANSPARENCY STYLES
+───────────────────────────────────────────────────────────────────────────── */
+.bg-panel-transparent {
+  background-color: rgba(207, 197, 197, 0.021) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+.light .bg-panel-transparent {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   STATUS UTILITIES
+   Perfect theme-adaptive styles for status panels and banners
+───────────────────────────────────────────────────────────────────────────── */
+.bg-status-success {
+  background-color: var(--neu-success-bg) !important;
+}
+
+.border-status-success {
+  border-color: var(--neu-success-border) !important;
+}
+
+.text-status-success {
+  color: var(--neu-success) !important;
+}
+
+.bg-status-cyan {
+  background-color: var(--neu-cyan-bg) !important;
+}
+
+.border-status-cyan {
+  border-color: var(--neu-cyan-border) !important;
+}
+
+.text-status-cyan {
+  color: var(--neu-cyan) !important;
+}
+
+.bg-status-warning {
+  background-color: var(--neu-warning-bg) !important;
+}
+
+.border-status-warning {
+  border-color: var(--neu-warning-border) !important;
+}
+
+.text-status-warning {
+  color: var(--neu-warning) !important;
+}
+
+.bg-status-danger {
+  background-color: var(--neu-danger-bg) !important;
+}
+
+.border-status-danger {
+  border-color: var(--neu-danger-border) !important;
+}
+
+.text-status-danger {
+  color: var(--neu-danger) !important;
+}
+
+.bg-status-indigo {
+  background-color: var(--neu-indigo-bg) !important;
+}
+
+.border-status-indigo {
+  border-color: var(--neu-indigo-border) !important;
+}
+
+.text-status-indigo {
+  color: var(--neu-indigo) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   PRINT OVERRIDES
+───────────────────────────────────────────────────────────────────────────── */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    background-image: none !important;
+    color: black !important;
+  }
+
+  .neu-card {
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   PREMIUM HIGH-CONTRAST BLACK & WHITE BUTTON
+───────────────────────────────────────────────────────────────────────────── */
+.exec-bw-btn {
+  background-color: #000000;
+  border: 1.5px solid #ffffff;
+  color: #ffffff;
+  border-radius: 6px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.exec-bw-btn:hover {
+  background-color: #ffffff;
+  border-color: #ffffff;
+  color: #000000;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.exec-bw-btn:active {
+  transform: translateY(-0.5px);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
+}
+
+/* Light Theme overrides for the black-and-white button */
+.light .exec-bw-btn {
+  background-color: #ffffff;
+  border-color: #000000;
+  color: #000000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.light .exec-bw-btn:hover {
+  background-color: #000000;
+  border-color: #000000;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.light .exec-bw-btn:active {
+  transform: translateY(-0.5px);
+}
+
+/* Subtle premium hover shimmer */
+.exec-bw-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.light .exec-bw-btn::before {
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.08), transparent);
+}
+
+.exec-bw-btn:hover::before {
+  transform: translateX(100%);
+}
