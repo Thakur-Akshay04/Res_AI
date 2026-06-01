@@ -12,7 +12,9 @@
   <img src="https://img.shields.io/badge/Clerk_Auth-6C47FF?style=for-the-badge&logo=clerk&logoColor=white" alt="Clerk Auth" />
   <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
   <img src="https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white" alt="Nginx" />
+  <img src="https://img.shields.io/badge/SonarQube_Cloud-Passed-4E9BCD?style=for-the-badge&logo=sonarqube&logoColor=white" alt="SonarQube Cloud" />
 </p>
+
 
 Res_AI is a split-screen **AI Resume Builder & ATS Optimizer**. It leverages the **Groq API (Llama-3)** to analyze job descriptions, optimize resume content, score ATS compatibility, and export print-ready PDFs, backed by a robust and seamless **Clerk Authentication** system.
 
@@ -128,6 +130,8 @@ Required only if enabling password recovery and verification emails:
 *   [x] Standardised multi-container setup running under Docker and Nginx reverse proxy.
 *   [x] Solid Clerk Auth user-identity mapping synced automatically with local MongoDB user profiles.
 *   [x] Robust production Docker builds avoiding non-interactive package manager blocks.
+*   [x] Passed SonarQube Cloud Quality Gate with strict secure coding practices (fully mitigated NoSQL, ReDoS, and Host Header Injection vulnerabilities).
+
 
 ### Future Updates
 *   [ ] Add multiple selectable PDF templates (e.g., Classic, Creative, Minimalist).
