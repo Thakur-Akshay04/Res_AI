@@ -65,7 +65,7 @@ client/
 │   │   └── resume/          # Resume interactive elements (ResumePreview, VersionHistory, Suggestions)
 │   ├── pages/               # Top-level Page elements corresponding to URL routes (Dashboard, Builder, Analyze)
 │   ├── stores/              # State management powered by Zustand (authStore, resumeStore, themeStore)
-│   └── lib/                 # Core API / Supabase configuration client clients (axios, supabase)
+│   └── lib/                 # Core API / Clerk configuration clients (axios, clerkTheme)
 ```
 
 ### 2. Server Architecture (`server/`)
@@ -84,7 +84,7 @@ server/
 ├── models/                  # Mongoose MongoDB schemas representing data documents
 ├── middleware/              # Express middlewares (authentication guards, rate-limiters, uploaders)
 ├── validators/              # Input schema validation utilizing express-validator
-├── utils/                   # Shared utility modules (Groq AI, PDF generators, Winster logger)
+├── utils/                   # Shared utility modules (Groq AI, PDF generators, Winston logger, email templates)
 └── __tests__/               # Jest integration and unit test suite
 ```
 
@@ -103,6 +103,25 @@ API routers are strictly separated by domain entity. If a new domain feature is 
 2. Controller (`controllers/featureController.js`)
 3. Validation schema (`validators/featureValidator.js`)
 4. Mount it explicitly in `index.js` under `/api/feature`.
+
+### 3. Type-Safe DB Query Inputs (NoSQL Injection Defense)
+To prevent NoSQL object injection attacks (e.g., passing nested MongoDB query objects like `{ $ne: "" }` instead of plain strings), all untrusted user parameters derived from `req.body`, `req.query`, or `req.params` **must** be explicitly type-cast to strings before they are used in query filters.
+* **Standard practice**: Always wrap raw query parameters with `String(...)` or cast them cleanly:
+* **Example**:
+  ```javascript
+  const emailStr = String(req.body.email).toLowerCase();
+  const user = await User.findOne({ email: emailStr });
+  ```
+
+### 4. Core Node.js Import Protocol (`node:`)
+When importing built-in Node.js core modules (such as `crypto`, `path`, or `fs`), always prefix the module name with the `node:` protocol. This explicitly tells the runtime and developers that it is a native built-in module rather than a potential third-party package from npm.
+* **Standard practice**: Prefix core imports with `node:`.
+* **Example**: `const crypto = require('node:crypto');`
+
+### 5. ReDoS-Proof Validation and Masking
+Avoid utilizing complex, unanchored, or nested greedy quantifiers in regular expressions on user-controlled inputs, which are vulnerable to catastrophic backtracking (Regular Expression Denial of Service - ReDoS).
+* **Standard practice**: Replace complex matching and masking patterns with linear O(n) string manipulation methods (like `.includes()`, `.slice()`, or `.split()`), or enforce a strict input length limit (e.g., 254 characters) before running the regex.
+
 
 ---
 
