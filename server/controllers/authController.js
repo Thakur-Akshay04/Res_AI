@@ -7,6 +7,14 @@ const logger = require('../utils/logger');
 const sendEmail = require('../utils/email');
 const { getPasswordResetTemplate } = require('../utils/emailTemplates');
 
+const maskEmail = (email) => {
+  const parts = email.split('@');
+  if (parts.length !== 2) return '***';
+  const name = parts[0];
+  const domain = parts[1];
+  const maskedName = name.length > 2 ? name.slice(0, 2) + '***' : name + '***';
+  return `${maskedName}@${domain}`;
+};
 
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -74,7 +82,14 @@ const login = async (req, res, next) => {
 
     const safeIdentifier = String(req.body.identifier);
     const passwordStr = String(req.body.password);
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeIdentifier);
+
+    // Enforce input length limit to completely prevent high-complexity lookup operations
+    if (safeIdentifier.length > 254) {
+      return next(new AppError('Invalid credentials format', 400));
+    }
+
+    // Solve ReDoS vulnerability completely without regular expressions (using linear O(n) index matching)
+    const isEmail = safeIdentifier.includes('@') && safeIdentifier.indexOf('.') > safeIdentifier.indexOf('@');
 
     let user;
 
@@ -157,7 +172,7 @@ const forgotPassword = async (req, res, next) => {
     const resetToken = user.createResetToken();
     await user.save({ validateBeforeSave: false });
 
-    logger.info(`Password reset token generated for ${emailStr.replace(/(.{2}).*(@.*)/, '$1***$2')}`);
+    logger.info(`Password reset token generated for ${maskEmail(emailStr)}`);
 
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
     const resetUrl = `${clientUrl}/reset-password?token=${resetToken}`;
