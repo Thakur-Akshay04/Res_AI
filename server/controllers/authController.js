@@ -1,10 +1,12 @@
 const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 const { validationResult } = require('express-validator');
 const User = require('../models/User');
 const { AppError } = require('../middleware/errorHandler');
 const logger = require('../utils/logger');
 const sendEmail = require('../utils/email');
+const { getPasswordResetTemplate } = require('../utils/emailTemplates');
+
 
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -71,37 +73,29 @@ const login = async (req, res, next) => {
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
 
     let user;
-    let isAuthenticated = false;
 
     if (isEmail) {
       const emailLower = identifier.toLowerCase();
       user = await User.findOne({ email: emailLower }).select('+password +loginAttempts +lockUntil');
-
-      if (user && user.isLocked()) {
-        return next(new AppError('Account temporarily locked due to too many failed login attempts. Please try again in 15 minutes.', 423));
-      }
-
-      if (user && user.password) {
-        isAuthenticated = await user.comparePassword(password);
-      }
     } else {
+      const escapedName = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       user = await User.findOne({
-        name: { $regex: new RegExp(`^${identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+        name: { $regex: new RegExp(`^${escapedName}$`, 'i') }
       }).select('+password +loginAttempts +lockUntil');
-
-      if (user && user.isLocked()) {
-        return next(new AppError('Account temporarily locked due to too many failed login attempts. Please try again in 15 minutes.', 423));
-      }
-
-      if (user && user.password) {
-        isAuthenticated = await user.comparePassword(password);
-      }
     }
 
-    if (!user || !isAuthenticated) {
-      if (user) {
-        await user.incrementLoginAttempts();
-      }
+    if (!user) {
+      return next(new AppError('Invalid credentials', 401));
+    }
+
+    if (user.isLocked()) {
+      return next(new AppError('Account temporarily locked due to too many failed login attempts. Please try again in 15 minutes.', 423));
+    }
+
+    const isAuthenticated = user.password ? await user.comparePassword(password) : false;
+
+    if (!isAuthenticated) {
+      await user.incrementLoginAttempts();
       return next(new AppError('Invalid credentials', 401));
     }
 
@@ -170,29 +164,7 @@ const forgotPassword = async (req, res, next) => {
       `If you did not request this, please ignore this email and your password will remain unchanged.\n\n` +
       `Note: The link is valid for 15 minutes.\n`;
 
-    const htmlMessage = `
-      <div style="font-family: 'Inter', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 12px; background-color: #ffffff;">
-        <h2 style="color: #111827; font-size: 24px; font-weight: 700; margin-bottom: 16px;">Password Reset Request</h2>
-        <p style="color: #4b5563; font-size: 16px; line-height: 1.5; margin-bottom: 24px;">
-          You requested to reset your ResuAI password. Click the button below to choose a new password. This link is only valid for 15 minutes.
-        </p>
-        <div style="text-align: center; margin-bottom: 24px;">
-          <a href="${resetUrl}" style="background-color: #4f46e5; color: #ffffff; padding: 12px 24px; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 8px; display: inline-block;">
-            Reset Password
-          </a>
-        </div>
-        <p style="color: #6b7280; font-size: 14px; margin-bottom: 24px;">
-          If the button above doesn't work, copy and paste this URL into your browser:
-        </p>
-        <p style="word-break: break-all; background-color: #f3f4f6; padding: 12px; border-radius: 6px; font-family: monospace; font-size: 14px; color: #374151; margin-bottom: 24px;">
-          ${resetUrl}
-        </p>
-        <hr style="border: 0; border-top: 1px solid #e5e7eb; margin-bottom: 24px;" />
-        <p style="color: #9ca3af; font-size: 12px;">
-          If you did not request a password reset, you can safely ignore this email.
-        </p>
-      </div>
-    `;
+    const htmlMessage = getPasswordResetTemplate(resetUrl);
 
     try {
       await sendEmail({

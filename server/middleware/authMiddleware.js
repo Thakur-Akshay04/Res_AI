@@ -50,7 +50,6 @@ const protect = async (req, res, next) => {
 
       isClerk = true;
     } catch (clerkErr) {
-      logger.error('Clerk Auth Error: ' + clerkErr.message + '\nStack: ' + clerkErr.stack);
       // Not a Clerk token — fall back to local JWT
       try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -59,10 +58,13 @@ const protect = async (req, res, next) => {
         req.user = { id: user._id, name: user.name, email: user.email };
         return next();
       } catch (jwtErr) {
-        logger.error('Auth Error (JWT fallback): ' + jwtErr.message);
+        if (process.env.NODE_ENV !== 'test') {
+          logger.error('Auth Error (both Clerk and local JWT verification failed): ' + jwtErr.message);
+        }
         return next(new AppError('Not authorized. Invalid token.', 401));
       }
     }
+
 
     // --- Clerk path: find or create MongoDB user by email ---
     if (!clerkEmail) {
@@ -92,7 +94,9 @@ const protect = async (req, res, next) => {
 
     next();
   } catch (error) {
-    logger.error('Auth Error: ' + error.message);
+    if (process.env.NODE_ENV !== 'test') {
+      logger.error('Auth Error: ' + error.message);
+    }
     return next(new AppError('Not authorized. Invalid token.', 401));
   }
 };
