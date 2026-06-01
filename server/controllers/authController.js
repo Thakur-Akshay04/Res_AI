@@ -82,7 +82,7 @@ const login = async (req, res, next) => {
       const emailLower = safeIdentifier.toLowerCase();
       user = await User.findOne({ email: emailLower }).select('+password +loginAttempts +lockUntil');
     } else {
-      const escapedName = safeIdentifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const escapedName = safeIdentifier.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
       user = await User.findOne({
         name: { $regex: new RegExp(`^${escapedName}$`, 'i') }
       }).select('+password +loginAttempts +lockUntil');
@@ -225,7 +225,7 @@ const resetPassword = async (req, res, next) => {
       return next(new AppError('Invalid or expired reset token', 400));
     }
 
-    user.password = password;
+    user.password = passwordStr;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
