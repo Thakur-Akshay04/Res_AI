@@ -10,7 +10,7 @@
   <title>AI Resume Builder — Intelligent ATS-Optimized Resumes</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" crossorigin="anonymous">
   <style>
     *,
     *::before,
@@ -25,7 +25,6 @@
       font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     }
 
-    /* Ambient background aura pulse */
     @keyframes aura-breath {
       0% {
         transform: translate(-50%, -50%) scale(0.95);
@@ -37,7 +36,6 @@
       }
     }
 
-    /* Gyroscope rotation keyframes */
     @keyframes spin-x {
       0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
       100% { transform: rotateX(360deg) rotateY(180deg) rotateZ(360deg); }
@@ -53,7 +51,6 @@
       100% { transform: rotateX(360deg) rotateY(180deg) rotateZ(360deg); }
     }
 
-    /* Letter reveal animation */
     @keyframes letter-reveal {
       to {
         opacity: 1;
@@ -62,7 +59,6 @@
       }
     }
 
-    /* Top progress bar load animation */
     @keyframes progress-fill {
       0% {
         width: 0%;
@@ -75,7 +71,6 @@
       }
     }
 
-    /* Fade-out transition when React mounts */
     @keyframes sk-fade {
       0% {
         opacity: 1;
@@ -87,7 +82,6 @@
       }
     }
 
-    /* Text pulsing animation */
     @keyframes text-pulse {
       0%, 100% {
         opacity: 0.45;
@@ -97,7 +91,6 @@
       }
     }
 
-    /* Full-screen overlay */
     #app-skeleton {
       position: fixed;
       inset: 0;
@@ -113,7 +106,6 @@
       overflow: hidden;
     }
 
-    /* Top glowing progress line indicator */
     .sk-progress-bar {
       position: absolute;
       top: 0;
@@ -125,7 +117,6 @@
       z-index: 10000;
     }
 
-    /* Center glowing ambient aura */
     .sk-ambient-glow {
       position: absolute;
       width: 320px;
@@ -147,7 +138,6 @@
       z-index: 2;
     }
 
-    /* Gyroscope Loader */
     .sk-gyro-container {
       position: relative;
       width: 90px;
@@ -192,7 +182,6 @@
       filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7));
     }
 
-    /* Space Grotesk Wordmark */
     .sk-wordmark {
       display: flex;
       gap: 3px;
@@ -211,7 +200,6 @@
       animation: letter-reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    /* Subtitle ticker */
     .sk-status-ticker {
       font-family: monospace;
       font-size: 9px;
@@ -235,21 +223,14 @@
   </style>
 
   <div id="app-skeleton" aria-hidden="true">
-    <!-- Top progress bar -->
     <div class="sk-progress-bar"></div>
-
-    <!-- Breathing ambient aura background -->
     <div class="sk-ambient-glow"></div>
-
     <div class="sk-center-content">
-      <!-- Gyroscope Orbit -->
       <div class="sk-gyro-container">
         <div class="sk-gyro-ring one"></div>
         <div class="sk-gyro-ring two"></div>
         <div class="sk-gyro-ring three"></div>
       </div>
-
-      <!-- High-end wordmark with letter-by-letter reveal -->
       <div class="sk-wordmark">
         <span class="sk-letter" style="animation-delay: 0.05s;">R</span>
         <span class="sk-letter" style="animation-delay: 0.12s;">e</span>
@@ -258,8 +239,6 @@
         <span class="sk-letter" style="animation-delay: 0.33s;">A</span>
         <span class="sk-letter" style="animation-delay: 0.40s;">I</span>
       </div>
-
-      <!-- Premium status tracker -->
       <div class="sk-status-ticker">
         <span>INITIALIZING WORKSPACE</span>
         <span class="sk-cursor"></span>
@@ -268,7 +247,7 @@
   </div>
   <script>
     if (window.location.pathname !== '/') {
-      const loader = document.getElementById('app-skeleton');
+      var loader = document.getElementById('app-skeleton');
       if (loader) loader.style.display = 'none';
     }
   </script>
