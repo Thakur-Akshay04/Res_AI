@@ -1,15 +1,15 @@
 const pdf = require('pdf-parse');
 const Groq = require('groq-sdk');
 const { AI_PROMPTS, AI_CONFIG } = require('../utils/constants');
-const { cleanJsonResponse, getGroqUsageInfo, getClient } = require('../utils/aiHelper');
+const { cleanJsonResponse, getGroqUsageInfo, getClient, updateGroqUsageFromHeaders, updateGroqUsageFromError, trackTokensUsed } = require('../utils/aiHelper');
 const logger = require('../utils/logger');
+const User = require('../models/User');
+const AnalysisReport = require('../models/AnalysisReport');
 
 const analyzeResume = async (req, res, next) => {
   try {
-    const User = require('../models/User');
     const user = await User.findById(req.user.id);
-    if (user && user.apiCredits === undefined) user.apiCredits = 50;
-    if (!user || user.apiCredits <= 0) {
+    if (!user || (user.apiCredits ?? 50) <= 0) {
       return res.status(402).json({
         success: false,
         message: 'API Token limit reached. Please wait for a refill or contact support.'
@@ -101,7 +101,6 @@ const analyzeResume = async (req, res, next) => {
     const auditTokens = result.usage?.total_tokens || Math.ceil((userMessage.length + (result.choices[0]?.message?.content || '').length) / 3.8);
 
     if (httpResponse?.headers) {
-      const { updateGroqUsageFromHeaders } = require('../utils/aiHelper');
       try { updateGroqUsageFromHeaders(httpResponse.headers); } catch(e) {}
     }
 
@@ -162,17 +161,25 @@ const analyzeResume = async (req, res, next) => {
       resumeTextLength: resumeText.length,
     };
 
-    const { trackTokensUsed } = require('../utils/aiHelper');
     const contentTokens = req._contentTokens || 0;
     if (contentTokens > 0) await trackTokensUsed(req.user.id, contentTokens);
     await trackTokensUsed(req.user.id, auditTokens);
 
-    user.apiCredits -= 1;
-    await user.save();
+    // Atomic credit deduction: prevents race condition under concurrent requests
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: req.user.id, apiCredits: { $gt: 0 } },
+      { $inc: { apiCredits: -1 } },
+      { new: true }
+    );
+    if (!updatedUser) {
+      return res.status(402).json({
+        success: false,
+        message: 'API Token limit reached. Please wait for a refill or contact support.'
+      });
+    }
 
     let reportId = null;
     try {
-      const AnalysisReport = require('../models/AnalysisReport');
       const pdfBase64 = req.file ? req.file.buffer.toString('base64') : null;
       const savedReport = await AnalysisReport.create({
         userId: req.user.id,
@@ -200,7 +207,7 @@ const analyzeResume = async (req, res, next) => {
         ...normalizedAnalysis,
         content: structuredContent,
         reportId,
-        apiCredits: user.apiCredits
+        apiCredits: updatedUser.apiCredits
       }
     });
 
@@ -213,7 +220,6 @@ const analyzeResume = async (req, res, next) => {
 
       if (errStr.includes('429') || errStr.toLowerCase().includes('rate limit') || errStr.toLowerCase().includes('tokens per minute') || errStr.toLowerCase().includes('rate_limit_exceeded') || errStr.includes('413') || errStr.includes('quota') || errStr.includes('resource_exhausted') || errStr.toLowerCase().includes('daily limit') || errStr.toLowerCase().includes('too large')) {
         userMessage = 'API token limit reached.';
-        const { updateGroqUsageFromError } = require('../utils/aiHelper');
         updateGroqUsageFromError(errStr);
       } else if (errStr.includes('API_KEY') || errStr.includes('apiKey')) {
         userMessage = 'AI API key is not configured. Please check server settings.';
@@ -266,10 +272,8 @@ function normSection(section) {
 
 const auditResumeJSON = async (req, res, next) => {
   try {
-    const User = require('../models/User');
     const user = await User.findById(req.user.id);
-    if (user && user.apiCredits === undefined) user.apiCredits = 50;
-    if (!user || user.apiCredits <= 0) {
+    if (!user || (user.apiCredits ?? 50) <= 0) {
       return res.status(402).json({
         success: false,
         message: 'API Token limit reached. Please wait for a refill or contact support.'
@@ -360,15 +364,23 @@ const auditResumeJSON = async (req, res, next) => {
       verdict: analysis.verdict || 'Analysis complete.',
     };
 
-    const { trackTokensUsed } = require('../utils/aiHelper');
     await trackTokensUsed(req.user.id, auditJsonTokens);
 
-    user.apiCredits -= 1;
-    await user.save();
+    // Atomic credit deduction: prevents race condition under concurrent requests
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: req.user.id, apiCredits: { $gt: 0 } },
+      { $inc: { apiCredits: -1 } },
+      { new: true }
+    );
+    if (!updatedUser) {
+      return res.status(402).json({
+        success: false,
+        message: 'API Token limit reached. Please wait for a refill or contact support.'
+      });
+    }
 
     let reportId = null;
     try {
-      const AnalysisReport = require('../models/AnalysisReport');
       const resumeName = (resumeContent?.personalInfo?.name ? `${resumeContent.personalInfo.name}'s Resume` : '') || resumeContent?.jobTitle || 'Resume_Analysis';
       const savedReport = await AnalysisReport.create({
         userId: req.user.id,
@@ -394,31 +406,32 @@ const auditResumeJSON = async (req, res, next) => {
       data: {
         ...normalizedAnalysis,
         reportId,
-        apiCredits: user.apiCredits
+        apiCredits: updatedUser.apiCredits
       }
     });
 
   } catch (error) {
-    let errMsg = error?.error?.error?.message || error?.message || String(error) || 'Analysis failed. Please try again.';
-    const errStr = typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg);
+    const rawErrMsg = error?.error?.error?.message || error?.message || String(error) || '';
+    const errStr = typeof rawErrMsg === 'string' ? rawErrMsg : JSON.stringify(rawErrMsg);
+    let userMessage = 'Analysis failed. Please try again.';
     
     if (errStr.includes('429') || errStr.toLowerCase().includes('rate limit') || errStr.toLowerCase().includes('tokens per minute') || errStr.toLowerCase().includes('rate_limit_exceeded') || errStr.includes('413') || errStr.toLowerCase().includes('daily limit') || errStr.toLowerCase().includes('too large')) {
-      errMsg = 'API token limit reached.';
-      const { updateGroqUsageFromError } = require('../utils/aiHelper');
+      userMessage = 'API token limit reached.';
       updateGroqUsageFromError(errStr);
+    } else if (errStr.includes('API_KEY') || errStr.includes('apiKey')) {
+      userMessage = 'AI API key is not configured. Please check server settings.';
     }
 
-    logger.error('auditResumeJSON error:', errMsg);
+    logger.error('auditResumeJSON error:', rawErrMsg);
     return res.status(500).json({
       success: false,
-      message: errMsg
+      message: userMessage
     });
   }
 };
 
 const listReports = async (req, res, next) => {
   try {
-    const AnalysisReport = require('../models/AnalysisReport');
     const reports = await AnalysisReport.find({ userId: req.user.id })
       .select('resumeName overall_score createdAt jobDescription')
       .sort({ createdAt: -1 });
@@ -438,7 +451,6 @@ const listReports = async (req, res, next) => {
 
 const getReport = async (req, res, next) => {
   try {
-    const AnalysisReport = require('../models/AnalysisReport');
     const report = await AnalysisReport.findOne({
       _id: req.params.id,
       userId: req.user.id
@@ -466,7 +478,6 @@ const getReport = async (req, res, next) => {
 
 const deleteReport = async (req, res, next) => {
   try {
-    const AnalysisReport = require('../models/AnalysisReport');
     const result = await AnalysisReport.deleteOne({
       _id: req.params.id,
       userId: req.user.id

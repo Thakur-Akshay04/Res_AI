@@ -151,7 +151,7 @@ const Dashboard = () => {
                 <FileText className="w-4 h-4 text-neu-primary" strokeWidth={2.5} />
               </div>
               <span className="hidden sm:inline font-bold text-xl tracking-tight text-neu-text font-display">
-                ResuAI
+                ResuCraft
               </span>
             </Link>
           </div>

@@ -97,10 +97,10 @@ const login = async (req, res, next) => {
       const emailLower = safeIdentifier.toLowerCase();
       user = await User.findOne({ email: emailLower }).select('+password +loginAttempts +lockUntil');
     } else {
-      const escapedName = safeIdentifier.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
-      user = await User.findOne({
-        name: { $regex: new RegExp(`^${escapedName}$`, 'i') }
-      }).select('+password +loginAttempts +lockUntil');
+      // Case-insensitive lookup using collation (uses indexes, unlike $regex)
+      user = await User.findOne({ name: safeIdentifier })
+        .collation({ locale: 'en', strength: 2 })
+        .select('+password +loginAttempts +lockUntil');
     }
 
     if (!user) {
@@ -188,7 +188,7 @@ const forgotPassword = async (req, res, next) => {
     try {
       await sendEmail({
         email: user.email,
-        subject: 'ResuAI - Password Reset Request',
+        subject: 'ResuCraft - Password Reset Request',
         message,
         html: htmlMessage
       });

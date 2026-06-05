@@ -425,17 +425,29 @@ const generateResumeHTML = (personalInfo, content, template = 'modern', jobTitle
 };
 
 /**
- * Generate PDF from resume data using Puppeteer
+ * Get or create a shared Puppeteer browser instance (singleton).
+ * Avoids launching a new ~80MB Chromium process per PDF request.
+ */
+let _browser = null;
+const getBrowser = async () => {
+  if (_browser && _browser.isConnected()) return _browser;
+  _browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
+  });
+  // Automatically null out when browser disconnects
+  _browser.on('disconnected', () => { _browser = null; });
+  return _browser;
+};
+
+/**
+ * Generate PDF from resume data using Puppeteer (shared browser instance)
  */
 const generatePDF = async (personalInfo, content, template = 'modern', jobTitle = '') => {
-  let browser;
+  let page;
   try {
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
-    });
-
-    const page = await browser.newPage();
+    const browser = await getBrowser();
+    page = await browser.newPage();
     const html = generateResumeHTML(personalInfo, content, template, jobTitle);
     await page.setContent(html, { waitUntil: 'networkidle0' });
     // Ensure all web fonts (Google Fonts) are fully loaded before PDF capture
@@ -457,7 +469,9 @@ const generatePDF = async (personalInfo, content, template = 'modern', jobTitle 
     logger.error('PDF generation error:', error.message);
     throw error;
   } finally {
-    if (browser) await browser.close();
+    if (page) {
+      try { await page.close(); } catch (_) {}
+    }
   }
 };
 

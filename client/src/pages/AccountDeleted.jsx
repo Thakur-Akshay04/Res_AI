@@ -41,7 +41,7 @@ const AccountDeleted = () => {
           </div>
 
           <p className="text-[10px] text-neu-text-muted mt-6 tracking-wide uppercase">
-            Thank you for using ResuAI
+            Thank you for using ResuCraft
           </p>
         </div>
       </div>

@@ -428,7 +428,7 @@ const PublicResume = () => {
         <div className="text-center py-6 space-y-3">
           <div className="flex items-center justify-center gap-2 text-sm text-neu-text-muted">
             <FileText className="w-4 h-4 text-neu-text-muted" />
-            Powered by <span className="font-bold text-neu-text">ResuAI</span>
+            Powered by <span className="font-bold text-neu-text">ResuCraft</span>
           </div>
           <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-neu-primary hover:underline">
             Create your own AI resume

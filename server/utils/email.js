@@ -32,7 +32,7 @@ ${options.message}
     });
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'ResuAI <noreply@resuai.com>',
+      from: process.env.EMAIL_FROM || 'ResuCraft <noreply@resucraft.com>',
       to: options.email,
       subject: options.subject,
       text: options.message,

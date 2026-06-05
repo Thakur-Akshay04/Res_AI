@@ -66,4 +66,7 @@ const analysisReportSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Compound index for the common list query pattern
+analysisReportSchema.index({ userId: 1, createdAt: -1 });
+
 module.exports = mongoose.model('AnalysisReport', analysisReportSchema);

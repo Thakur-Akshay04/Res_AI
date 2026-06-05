@@ -29,7 +29,7 @@ const Register = () => {
             <div className="w-9 h-12 rounded-xl bg-neu-primary/10 flex items-center justify-center text-neu-primary">
               <FileText className="w-6 h-6" />
             </div>
-            <span className="font-bold text-2xl tracking-tight text-neu-text">ResuAI</span>
+            <span className="font-bold text-2xl tracking-tight text-neu-text">ResuCraft</span>
           </Link>
 
           <div className="mb-4 text-center">
@@ -55,7 +55,7 @@ const Register = () => {
             <div className="w-9 h-12 rounded-xl bg-neu-primary/10 flex items-center justify-center text-neu-primary">
               <FileText className="w-6 h-6" />
             </div>
-            <span className="font-bold text-2xl tracking-tight text-neu-text">ResuAI</span>
+            <span className="font-bold text-2xl tracking-tight text-neu-text">ResuCraft</span>
           </Link>
         </div>
 
@@ -81,7 +81,7 @@ const Register = () => {
         </div>
 
         <p className="text-[12px] text-neu-text-muted tracking-wide relative z-10 mt-auto pt-4 border-t border-neu-border/50">
-          ResuAI — Built specifically for developers, engineers, and product professionals.
+          ResuCraft — Built specifically for developers, engineers, and product professionals.
         </p>
       </div>
     </div>

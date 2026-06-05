@@ -189,6 +189,25 @@ if (process.env.NODE_ENV !== 'test') {
           process.exit(1);
         }
       });
+
+      // Graceful shutdown: close active connections and database before exiting
+      const gracefulShutdown = (signal) => {
+        logger.info(`${signal} received — shutting down gracefully`);
+        server.close(() => {
+          logger.info('HTTP server closed');
+          mongoose.connection.close(false).then(() => {
+            logger.info('MongoDB connection closed');
+            process.exit(0);
+          });
+        });
+        // Force exit after 10s if graceful shutdown hangs
+        setTimeout(() => {
+          logger.error('Graceful shutdown timed out — forcing exit');
+          process.exit(1);
+        }, 10000);
+      };
+      process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+      process.on('SIGINT', () => gracefulShutdown('SIGINT'));
     };
     startServer(Number(PORT));
   });

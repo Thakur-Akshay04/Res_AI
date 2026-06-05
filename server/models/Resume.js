@@ -169,7 +169,11 @@ resumeSchema.methods.getLatestVersion = function() {
 
 resumeSchema.methods.getNextVersionNumber = function() {
   if (this.versions.length === 0) return 1;
-  return Math.max(...this.versions.map(v => v.versionNumber)) + 1;
+  return this.versions.reduce((max, v) => Math.max(max, v.versionNumber), 0) + 1;
 };
+
+// Compound indexes for common query patterns
+resumeSchema.index({ userId: 1, updatedAt: -1 });
+resumeSchema.index({ publicSlug: 1, isPublic: 1 });
 
 module.exports = mongoose.model('Resume', resumeSchema);

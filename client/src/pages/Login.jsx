@@ -28,7 +28,7 @@ const Login = () => {
             <div className="w-9 h-12 rounded-xl bg-neu-primary/10 flex items-center justify-center text-neu-primary">
               <FileText className="w-6 h-6" />
             </div>
-            <span className="font-bold text-2xl tracking-tight text-neu-text">ResuAI</span>
+            <span className="font-bold text-2xl tracking-tight text-neu-text">ResuCraft</span>
           </Link>
 
           <div className="mb-6">

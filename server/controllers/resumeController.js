@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const Resume = require('../models/Resume');
+const User = require('../models/User');
 const { generateResume } = require('../utils/aiHelper');
 const { generatePDF } = require('../utils/pdfHelper');
 const { AppError } = require('../middleware/errorHandler');
@@ -21,10 +22,8 @@ const generate = async (req, res, next) => {
       projects, certifications, achievements, activities
     } = req.body;
 
-    const User = require('../models/User');
     const user = await User.findById(req.user.id);
-    if (user && user.apiCredits === undefined) user.apiCredits = 50;
-    if (!user || user.apiCredits <= 0) {
+    if (!user || (user.apiCredits ?? 50) <= 0) {
       return res.status(402).json({
         success: false,
         message: 'API Token limit reached. Please wait for a refill or contact support.'
@@ -43,8 +42,11 @@ const generate = async (req, res, next) => {
     }, res, req.user.id);
 
     if (success) {
-      user.apiCredits -= 1;
-      await user.save();
+      // Atomic credit deduction: prevents race condition under concurrent requests
+      await User.findOneAndUpdate(
+        { _id: req.user.id, apiCredits: { $gt: 0 } },
+        { $inc: { apiCredits: -1 } }
+      );
     }
   } catch (error) {
     next(error);
@@ -54,7 +56,7 @@ const generate = async (req, res, next) => {
 const listResumes = async (req, res, next) => {
   try {
     const resumes = await Resume.find({ userId: req.user.id })
-      .select('-versions.content')
+      .select('-versions')
       .sort({ updatedAt: -1 });
 
     res.json({
@@ -221,6 +223,12 @@ const saveVersion = async (req, res, next) => {
 
     const { content, atsScore, jobDescriptionText, personalInfo, originalExperience, jobTitle, companyName } = req.body;
 
+    // Enforce maximum versions limit to prevent unbounded document growth
+    const MAX_VERSIONS = 20;
+    if (resume.versions.length >= MAX_VERSIONS) {
+      return next(new AppError(`Maximum ${MAX_VERSIONS} versions reached. Please delete old versions first.`, 400));
+    }
+
     const newVersion = {
       versionNumber: resume.getNextVersionNumber(),
       content: content || { summary: '', education: [], experience: [], projects: [], certifications: [], achievements: [], activities: [], skills: [], skillCategories: [], codingProfile: null },
@@ -233,18 +241,18 @@ const saveVersion = async (req, res, next) => {
     if (req.body.matchedKeywords) resume.matchedKeywords = req.body.matchedKeywords;
     if (req.body.missingKeywords) resume.missingKeywords = req.body.missingKeywords;
     if (req.body.suggestions) resume.suggestions = req.body.suggestions;
-    if (jobDescriptionText) resume.jobDescriptionText = jobDescriptionText;
-    if (personalInfo) resume.personalInfo = personalInfo;
-    if (originalExperience) resume.originalExperience = originalExperience;
-    if (req.body.originalEducation) resume.originalEducation = req.body.originalEducation;
-    if (req.body.originalProjects) resume.originalProjects = req.body.originalProjects;
-    if (req.body.originalCertifications) resume.originalCertifications = req.body.originalCertifications;
-    if (req.body.originalAchievements) resume.originalAchievements = req.body.originalAchievements;
-    if (req.body.originalActivities) resume.originalActivities = req.body.originalActivities;
-    if (req.body.originalSkills) resume.originalSkills = req.body.originalSkills;
-    if (req.body.profileType) resume.profileType = req.body.profileType;
-    if (jobTitle) resume.jobTitle = jobTitle;
-    if (companyName) resume.companyName = companyName;
+    if (jobDescriptionText !== undefined) resume.jobDescriptionText = jobDescriptionText;
+    if (personalInfo !== undefined) resume.personalInfo = personalInfo;
+    if (originalExperience !== undefined) resume.originalExperience = originalExperience;
+    if (req.body.originalEducation !== undefined) resume.originalEducation = req.body.originalEducation;
+    if (req.body.originalProjects !== undefined) resume.originalProjects = req.body.originalProjects;
+    if (req.body.originalCertifications !== undefined) resume.originalCertifications = req.body.originalCertifications;
+    if (req.body.originalAchievements !== undefined) resume.originalAchievements = req.body.originalAchievements;
+    if (req.body.originalActivities !== undefined) resume.originalActivities = req.body.originalActivities;
+    if (req.body.originalSkills !== undefined) resume.originalSkills = req.body.originalSkills;
+    if (req.body.profileType !== undefined) resume.profileType = req.body.profileType;
+    if (jobTitle !== undefined) resume.jobTitle = jobTitle;
+    if (companyName !== undefined) resume.companyName = companyName;
 
     await resume.save();
 

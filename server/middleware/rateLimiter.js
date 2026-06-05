@@ -10,6 +10,8 @@ const createLimiter = (windowMs, max, message) => {
     },
     standardHeaders: true,
     legacyHeaders: false,
+    // Use userId for authenticated routes (after protect middleware);
+    // falls back to IP for unauthenticated routes (e.g., auth endpoints)
     keyGenerator: (req) => {
       return req.user?.id || req.ip;
     }

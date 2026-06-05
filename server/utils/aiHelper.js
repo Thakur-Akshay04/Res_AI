@@ -2,12 +2,15 @@ const Groq = require('groq-sdk');
 const { AI_PROMPTS, AI_CONFIG } = require('./constants');
 const logger = require('./logger');
 
+let _groqClient = null;
 const getClient = () => {
+  if (_groqClient) return _groqClient;
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     throw new Error('GROQ_API_KEY is not set in environment variables');
   }
-  return new Groq({ apiKey });
+  _groqClient = new Groq({ apiKey });
+  return _groqClient;
 };
 
 const groqUsageCache = {
@@ -92,21 +95,8 @@ const updateGroqUsageFromError = (errorMessage) => {
 
 const getGroqUsageInfo = () => ({ ...groqUsageCache });
 
-const fetchActualUsageFromGroq = async () => {
-  try {
-    const ai = getClient();
-    const { response } = await ai.chat.completions.create({
-      messages: [{ role: 'user', content: 'h' }],
-      model: AI_CONFIG.MODEL,
-      max_tokens: 1
-    }).withResponse();
-    updateGroqUsageFromHeaders(response.headers);
-    logger.info("Successfully fetched live Groq usage from dummy call");
-  } catch (error) {
-    logger.error("Error fetching live Groq usage:", error.message);
-    updateGroqUsageFromError(error.message);
-  }
-};
+// fetchActualUsageFromGroq removed — it wasted real API tokens just to read rate-limit headers.
+// Usage info is now derived from actual request headers and error responses.
 
 const cleanJsonResponse = (text) => {
   let cleaned = text.trim();
@@ -265,28 +255,27 @@ const trackTokensUsed = async (userId, tokens) => {
   if (!userId || !tokens || tokens <= 0) return;
   try {
     const User = require('../models/User');
-    const user = await User.findById(userId);
-    if (!user) return;
-
     const now = new Date();
-    const lastReset = user.lastTokenResetDate ? new Date(user.lastTokenResetDate) : new Date(0);
+    const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
-    const isNewDay = now.getUTCDate() !== lastReset.getUTCDate() ||
-                     now.getUTCMonth() !== lastReset.getUTCMonth() ||
-                     now.getUTCFullYear() !== lastReset.getUTCFullYear();
+    // Atomic increment if same day (avoids read-modify-write race)
+    const result = await User.findOneAndUpdate(
+      { _id: userId, lastTokenResetDate: { $gte: todayStart } },
+      { $inc: { dailyTokensUsed: tokens } },
+      { new: true }
+    );
 
-    if (isNewDay) {
-      user.dailyTokensUsed = tokens;
-      user.lastTokenResetDate = now;
-    } else {
-      user.dailyTokensUsed = (user.dailyTokensUsed || 0) + tokens;
+    if (!result) {
+      // New day or first-time — atomically reset and set
+      await User.findByIdAndUpdate(userId, {
+        $set: { dailyTokensUsed: tokens, lastTokenResetDate: now }
+      });
     }
 
-    await user.save();
-    logger.info(`Tracked ${tokens} tokens for user ${userId}. Daily total used: ${user.dailyTokensUsed}`);
+    logger.info(`Tracked ${tokens} tokens for user ${userId}`);
   } catch (error) {
     logger.error(`Error tracking tokens for user ${userId}:`, error.message);
   }
 };
 
-module.exports = { generateResume, cleanJsonResponse, getGroqUsageInfo, fetchActualUsageFromGroq, updateGroqUsageFromHeaders, updateGroqUsageFromError, getClient, trackTokensUsed, getNextMidnightUTC };
+module.exports = { generateResume, cleanJsonResponse, getGroqUsageInfo, updateGroqUsageFromHeaders, updateGroqUsageFromError, getClient, trackTokensUsed, getNextMidnightUTC };

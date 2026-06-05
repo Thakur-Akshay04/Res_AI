@@ -18,7 +18,7 @@ const AppPreviewBlock = () => {
           <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-400/80 hover:scale-110 transition-transform" />
           <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-amber-400/80 hover:scale-110 transition-transform" />
           <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-400/80 hover:scale-110 transition-transform" />
-          <span className="hidden sm:inline text-[9px] sm:text-[10px] text-neu-text-muted font-mono ml-1 sm:ml-2 group-hover/preview:text-neu-text-light transition-colors duration-300">resuai_workspace_v1.0</span>
+          <span className="hidden sm:inline text-[9px] sm:text-[10px] text-neu-text-muted font-mono ml-1 sm:ml-2 group-hover/preview:text-neu-text-light transition-colors duration-300">resucraft_workspace_v1.0</span>
         </div>
         
         <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] sm:text-[10px] font-mono text-emerald-400 font-bold shadow-sm">
@@ -223,7 +223,7 @@ const Landing = () => {
               <FileText className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
             <span className="font-bold text-xl sm:text-2xl tracking-tight">
-              ResuAI
+              ResuCraft
             </span>
           </Link>
 
@@ -324,7 +324,7 @@ const Landing = () => {
               What's actually inside
             </h2>
             <p className="text-neu-text-light mb-8 max-w-md">
-              No vague promises. Here's what you get when you create a resume with ResuAI.
+              No vague promises. Here's what you get when you create a resume with ResuCraft.
             </p>
             <div className="flex flex-col gap-4">
               {[
@@ -455,9 +455,9 @@ const Landing = () => {
       <footer className="border-t border-neu-border bg-neu-bg">
         <div className="max-w-7xl mx-auto px-6 py-8 flex items-center justify-between text-sm text-neu-text-light">
           <div className="font-semibold text-neu-text flex items-center gap-2">
-             <FileText className="w-4 h-4" /> ResuAI
+             <FileText className="w-4 h-4" /> ResuCraft
           </div>
-          <span>© {new Date().getFullYear()} ResuAI</span>
+          <span>© {new Date().getFullYear()} ResuCraft</span>
         </div>
       </footer>
     </div>

@@ -3,10 +3,13 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Resume = require('../models/Resume');
+const AnalysisReport = require('../models/AnalysisReport');
 const { AppError } = require('../middleware/errorHandler');
 const logger = require('../utils/logger');
 const jwt = require('jsonwebtoken');
+const sendEmail = require('../utils/email');
 const { generateToken } = require('./authController');
+const { getNextMidnightUTC } = require('../utils/aiHelper');
 
 const updateProfile = async (req, res, next) => {
   try {
@@ -111,7 +114,18 @@ const requestEmailChange = async (req, res, next) => {
     const verifyLink = `${clientUrl}/profile/verify-email?token=${token}`;
 
     logger.info(`Email change requested for ${user.email} -> ${user.pendingEmail}`);
-    logger.info(`[DEV] Email verification link: ${verifyLink}`);
+
+    try {
+      const { getEmailChangeTemplate } = require('../utils/emailTemplates');
+      await sendEmail({
+        email: user.pendingEmail,
+        subject: 'ResuCraft - Verify Your New Email Address',
+        message: `You requested to change your email. Click the link to verify: ${verifyLink}\n\nThis link expires in 15 minutes.`,
+        html: getEmailChangeTemplate(verifyLink)
+      });
+    } catch (emailErr) {
+      logger.error(`Error sending email change verification: ${emailErr.message}`);
+    }
 
     res.json({
       success: true,
@@ -212,10 +226,7 @@ const changePassword = async (req, res, next) => {
       }
     }
 
-    // Step 1: permanently remove the old password hash from the database
-    await User.updateOne({ _id: user._id }, { $unset: { password: 1 } });
-
-    // Step 2: hash and store the new password
+    // Atomic single-step password update (safe if server crashes mid-operation)
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
     await User.updateOne({ _id: user._id }, { $set: { password: hashedPassword } });
@@ -283,8 +294,12 @@ const deleteAccount = async (req, res, next) => {
       }
     }
 
+    // Delete all associated data
     const deletedResumes = await Resume.deleteMany({ userId: user._id });
     logger.info(`Deleted ${deletedResumes.deletedCount} resume(s) for user ${user._id}`);
+
+    const deletedReports = await AnalysisReport.deleteMany({ userId: user._id });
+    logger.info(`Deleted ${deletedReports.deletedCount} analysis report(s) for user ${user._id}`);
 
     await User.findByIdAndDelete(user._id);
     logger.info(`Account permanently deleted: user ${user._id}`);
@@ -325,7 +340,6 @@ const getMe = async (req, res, next) => {
 
 const getGroqStatus = async (req, res, next) => {
   try {
-    const User = require('../models/User');
     const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
@@ -347,7 +361,6 @@ const getGroqStatus = async (req, res, next) => {
     const dailyLimit = 100000;
     const dailyRemaining = Math.max(0, dailyLimit - (user.dailyTokensUsed || 0));
 
-    const { getNextMidnightUTC } = require('../utils/aiHelper');
     const dailyResetAt = getNextMidnightUTC();
 
     const msLeft = new Date(dailyResetAt).getTime() - Date.now();

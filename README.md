@@ -1,4 +1,4 @@
-# Res_AI — AI Resume Builder & ATS Optimizer
+# ResuCraft — AI Resume Builder & ATS Optimizer
 
 <p align="left">
   <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
@@ -16,7 +16,7 @@
 </p>
 
 
-Res_AI is a split-screen **AI Resume Builder & ATS Optimizer**. It leverages the **Groq API (Llama-3)** to analyze job descriptions, optimize resume content, score ATS compatibility, and export print-ready PDFs, backed by a robust and seamless **Clerk Authentication** system.
+ResuCraft is a split-screen **AI Resume Builder & ATS Optimizer**. It leverages the **Groq API (Llama-3)** to analyze job descriptions, optimize resume content, score ATS compatibility, and export print-ready PDFs, backed by a robust and seamless **Clerk Authentication** system.
 
 ---
 
@@ -114,7 +114,7 @@ Required only if enabling password recovery and verification emails:
 *   **`SMTP_HOST`** / **`SMTP_PORT`**: Your SMTP server address and port.
 *   **`SMTP_USER`** / **`SMTP_PASS`**: SMTP mail account credentials.
 *   **`SMTP_SECURE`**: Toggle secure connection (`true` or `false`).
-*   **`EMAIL_FROM`**: The sender email address (e.g., `ResuAI <noreply@resuai.com>`).
+*   **`EMAIL_FROM`**: The sender email address (e.g., `ResuCraft <noreply@resucraft.com>`).
 
 ---
 
