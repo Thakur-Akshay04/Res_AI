@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
-const { generateLimiter, publicLimiter } = require('../middleware/rateLimiter');
+const { publicLimiter } = require('../middleware/rateLimiter');
 const { generateValidator, createResumeValidator, saveVersionValidator, mongoIdValidator, versionExportValidator } = require('../validators/resumeValidator');
 const {
   generate,
@@ -20,7 +20,7 @@ router.get('/resumes/public/:slug', publicLimiter, getPublicResume);
 
 router.use(protect);
 
-router.post('/resume/generate', generateLimiter, generateValidator, generate);
+router.post('/resume/generate', generateValidator, generate);
 
 router.get('/resumes', listResumes);
 router.get('/resumes/:id', mongoIdValidator, getResume);

@@ -68,8 +68,83 @@ const getEmbeddedFontCSS = () => {
   return _cachedFonts;
 };
 
+const parseGithub = (val) => {
+  if (!val) return { username: '', url: '' };
+  let trimmed = val.trim();
+  trimmed = trimmed.replace(/\/+$/, '');
+  
+  let username = trimmed;
+  let url = trimmed;
+  
+  if (trimmed.includes('github.com')) {
+    const parts = trimmed.split('/');
+    username = parts[parts.length - 1] || trimmed;
+    if (!/^https?:\/\//i.test(trimmed)) {
+      url = `https://${trimmed}`;
+    }
+  } else {
+    username = trimmed.replace(/^@/, '');
+    url = `https://github.com/${username}`;
+  }
+  
+  username = username.split('?')[0].split('#')[0];
+  return { username, url };
+};
+
+const parseLinkedin = (val) => {
+  if (!val) return { username: '', url: '' };
+  let trimmed = val.trim();
+  trimmed = trimmed.replace(/\/+$/, '');
+  
+  let username = trimmed;
+  let url = trimmed;
+  
+  if (trimmed.includes('linkedin.com')) {
+    const parts = trimmed.split('/');
+    const inIdx = parts.indexOf('in');
+    if (inIdx !== -1 && parts[inIdx + 1]) {
+      username = parts[inIdx + 1];
+    } else {
+      username = parts[parts.length - 1] || trimmed;
+    }
+    if (!/^https?:\/\//i.test(trimmed)) {
+      url = `https://${trimmed}`;
+    }
+  } else {
+    username = trimmed;
+    url = `https://linkedin.com/in/${username}`;
+  }
+  
+  username = username.split('?')[0].split('#')[0];
+  return { username, url };
+};
+
+const formatProjectGithubUrl = (val) => {
+  if (!val) return '';
+  let url = val.trim();
+  if (!/^https?:\/\//i.test(url)) {
+    if (url.toLowerCase().startsWith('github.com')) {
+      url = `https://${url}`;
+    } else {
+      url = `https://github.com/${url}`;
+    }
+  }
+  return url;
+};
+
+const formatExternalUrl = (val) => {
+  if (!val) return '';
+  let url = val.trim();
+  if (!/^https?:\/\//i.test(url)) {
+    url = `https://${url}`;
+  }
+  return url;
+};
+
 const generateResumeHTML = (personalInfo, content, template = 'modern', jobTitle = '') => {
   const { name, lastName, email, phone, address, linkedin, website, github } = personalInfo || {};
+  const githubData = github ? parseGithub(github) : null;
+  const linkedinData = linkedin ? parseLinkedin(linkedin) : null;
   const {
     summary = '',
     education = [],
@@ -246,8 +321,8 @@ const generateResumeHTML = (personalInfo, content, template = 'modern', jobTitle
           <!-- Row 2: linkedin, github, address -->
           ${(linkedin || github || address) ? `
           <div style="display:flex;gap:20pt;align-items:center;font-size:12pt;color:#000;">
-            ${linkedin ? `<span>${ICONS.linkedin}${esc(linkedin)}</span>` : ''}
-            ${github   ? `<span>${ICONS.github}${esc(github)}</span>` : ''}
+            ${linkedinData ? `<span>${ICONS.linkedin}<a href="${esc(linkedinData.url)}" target="_blank">${esc(linkedinData.username)}</a></span>` : ''}
+            ${githubData   ? `<span>${ICONS.github}<a href="${esc(githubData.url)}" target="_blank">${esc(githubData.username)}</a></span>` : ''}
             ${address  ? `<span>${ICONS.pin}${esc(address)}</span>` : ''}
           </div>` : ''}
         </div>
@@ -297,8 +372,8 @@ const generateResumeHTML = (personalInfo, content, template = 'modern', jobTitle
                 </div>
                 <div class="row-right">
                   ${[
-                    proj.github && `GitHub: ${esc(proj.github)}`,
-                    proj.link   && `${esc(proj.link)}`,
+                    proj.github && `<a href="${esc(formatProjectGithubUrl(proj.github))}" target="_blank">GitHub</a>`,
+                    proj.link   && `<a href="${esc(formatExternalUrl(proj.link))}" target="_blank">${proj.link.toLowerCase().includes('github.com') ? 'GitHub' : 'Link'}</a>`,
                   ].filter(Boolean).join(' | ')}
                 </div>
               </div>

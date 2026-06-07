@@ -32,6 +32,11 @@ The "skills" array MUST include EVERY SINGLE skill explicitly mentioned in the j
 - If the JD asks for "problem solving", "teamwork", "Agile", or "communication", include them!
 - Your primary job is to ensure a 100% keyword match for skills between the JD and the generated resume.
 
+🚨 CRITICAL — TECHNICAL SKILLS SOURCE CONSTRAINT (STRICT):
+- The generated "skills" and "skillCategories" lists MUST ONLY contain technical skills that are explicitly provided in the candidate's "Existing Skills" list (along with skills explicitly extracted from the job description for keyword matching).
+- ❌ STRICTLY PROHIBITED: Do NOT add, infer, or import any skills or technologies from the "techStack" field of the candidate's projects or from project descriptions into the overall "skills" or "skillCategories" list, unless they are already explicitly listed in the "Existing Skills" list.
+- Keep the project tech stacks separate. Only list skills in the skills/skillCategories sections if they are explicitly provided in the candidate's "Existing Skills" input list or extracted from the Job Description.
+
 For FRESHERS (students/recent graduates with little or no work experience):
 - Craft a compelling professional summary highlighting education, skills, and potential
 - Enhance project descriptions with impact and technical details
@@ -51,7 +56,8 @@ projects (array of { title, description, bullets[], techStack[], link, github } 
 certifications (array of { name, issuer, year, status } - status is "Completed" or "In Progress"),
 achievements (array of { title, description } - notable achievements, keep descriptions very short),
 activities (array of { title, role, description } - extracurricular activities, keep descriptions very short),
-skillCategories (array of { category, items[] } - group skills into categories relevant to the role such as "Programming Languages", "Frontend Technologies", "Backend & Frameworks", "Databases", "DevOps & Tools", "AI & LLMs". MAX 6 categories, MAX 6 items each. MUST include all key technologies from the JD.),
+skills (array of strings - a flat list of technical skills following the source constraints),
+skillCategories (array of { category, items[] } - group skills into categories relevant to the role such as "Programming Languages", "Frontend Technologies", "Backend & Frameworks", "Databases", "DevOps & Tools", "AI & LLMs". MAX 6 categories, MAX 6 items each. All items must comply with the source constraints and include all key technologies from the JD.),
 codingProfile (object or null - only if candidate provided competitive programming info. Shape: { totalProblems: number, platforms: [{ name: string, username: string }] }).
 
 Important: Only include sections that have data provided. If no experience is provided, return an empty experience array. Same for other optional sections. If no coding profile data is provided, return codingProfile as null.
@@ -59,6 +65,7 @@ Important: Only include sections that have data provided. If no experience is pr
 FINAL CHECKLIST (verify before responding):
 ✅ Does the summary contain the EXACT target job title? If not, fix it.
 ✅ Does skillCategories include the key technologies from the job description? If not, add them.
+✅ Are all skills in "skills" and "skillCategories" ONLY from the Existing Skills list and the Job Description, and not from the projects' tech stack (unless they were in the Existing Skills)?
 ✅ Will this fit on 1 A4 page? If not, trim bullet points.`,
 
    SCORE_RESUME: `Compare the resume content against the job description.

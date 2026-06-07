@@ -19,7 +19,7 @@ const generate = async (req, res, next) => {
 
     const {
       jobTitle, jobDescriptionText, experience, education,
-      projects, certifications, achievements, activities
+      projects, certifications, achievements, activities, skills
     } = req.body;
 
     const user = await User.findById(req.user.id);
@@ -39,6 +39,7 @@ const generate = async (req, res, next) => {
       certifications: certifications || [],
       achievements: achievements || [],
       activities: activities || [],
+      skills: skills || [],
     }, res, req.user.id);
 
     if (success) {

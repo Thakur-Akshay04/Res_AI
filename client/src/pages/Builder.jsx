@@ -115,6 +115,9 @@ const Builder = () => {
     queryKey: ['resume', id],
     queryFn: () => api.get(`/resumes/${id}`).then((r) => r.data.data),
     enabled: !!id,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   useEffect(() => {
