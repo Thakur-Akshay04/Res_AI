@@ -71,7 +71,9 @@ const getEmbeddedFontCSS = () => {
 const parseGithub = (val) => {
   if (!val) return { username: '', url: '' };
   let trimmed = val.trim();
-  trimmed = trimmed.replace(/\/+$/, '');
+  while (trimmed.endsWith('/')) {
+    trimmed = trimmed.slice(0, -1);
+  }
   
   let username = trimmed;
   let url = trimmed;
@@ -79,11 +81,12 @@ const parseGithub = (val) => {
   if (trimmed.includes('github.com')) {
     const parts = trimmed.split('/');
     username = parts[parts.length - 1] || trimmed;
-    if (!/^https?:\/\//i.test(trimmed)) {
+    const lowerTrimmed = trimmed.toLowerCase();
+    if (!lowerTrimmed.startsWith('http://') && !lowerTrimmed.startsWith('https://')) {
       url = `https://${trimmed}`;
     }
   } else {
-    username = trimmed.replace(/^@/, '');
+    username = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
     url = `https://github.com/${username}`;
   }
   
@@ -94,7 +97,9 @@ const parseGithub = (val) => {
 const parseLinkedin = (val) => {
   if (!val) return { username: '', url: '' };
   let trimmed = val.trim();
-  trimmed = trimmed.replace(/\/+$/, '');
+  while (trimmed.endsWith('/')) {
+    trimmed = trimmed.slice(0, -1);
+  }
   
   let username = trimmed;
   let url = trimmed;
@@ -107,7 +112,8 @@ const parseLinkedin = (val) => {
     } else {
       username = parts[parts.length - 1] || trimmed;
     }
-    if (!/^https?:\/\//i.test(trimmed)) {
+    const lowerTrimmed = trimmed.toLowerCase();
+    if (!lowerTrimmed.startsWith('http://') && !lowerTrimmed.startsWith('https://')) {
       url = `https://${trimmed}`;
     }
   } else {
@@ -122,8 +128,9 @@ const parseLinkedin = (val) => {
 const formatProjectGithubUrl = (val) => {
   if (!val) return '';
   let url = val.trim();
-  if (!/^https?:\/\//i.test(url)) {
-    if (url.toLowerCase().startsWith('github.com')) {
+  const lowerUrl = url.toLowerCase();
+  if (!lowerUrl.startsWith('http://') && !lowerUrl.startsWith('https://')) {
+    if (lowerUrl.startsWith('github.com')) {
       url = `https://${url}`;
     } else {
       url = `https://github.com/${url}`;
@@ -135,7 +142,8 @@ const formatProjectGithubUrl = (val) => {
 const formatExternalUrl = (val) => {
   if (!val) return '';
   let url = val.trim();
-  if (!/^https?:\/\//i.test(url)) {
+  const lowerUrl = url.toLowerCase();
+  if (!lowerUrl.startsWith('http://') && !lowerUrl.startsWith('https://')) {
     url = `https://${url}`;
   }
   return url;
