@@ -172,7 +172,7 @@ const forgotPassword = async (req, res, next) => {
     const resetToken = user.createResetToken();
     await user.save({ validateBeforeSave: false });
 
-    logger.info(`Password reset token generated for ${maskEmail(emailStr)}`);
+    logger.info({ message: 'Password reset token generated', email: maskEmail(emailStr) });
 
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
     const resetUrl = `${clientUrl}/reset-password?token=${resetToken}`;
@@ -193,7 +193,7 @@ const forgotPassword = async (req, res, next) => {
         html: htmlMessage
       });
     } catch (err) {
-      logger.error(`Error sending password reset email to ${user.email}: ${err.message}`);
+      logger.error({ message: 'Error sending password reset email', email: maskEmail(user.email), error: err.message });
     }
 
     const response = {
@@ -247,7 +247,7 @@ const resetPassword = async (req, res, next) => {
 
     const authToken = generateToken(user._id);
 
-    logger.info(`Password reset successful for ${user.email}`);
+    logger.info({ message: 'Password reset successful', email: maskEmail(user.email) });
 
     res.json({
       success: true,
