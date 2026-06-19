@@ -16,8 +16,7 @@ dotenv.config(); // Also load from cwd for Docker
 const requiredEnvVars = ['JWT_SECRET', 'GROQ_API_KEY'];
 const missingVars = requiredEnvVars.filter(v => !process.env[v]);
 if (missingVars.length > 0) {
-  console.error(`FATAL: Missing required environment variables: ${missingVars.join(', ')}`);
-  console.error('Please set them in your .env file or deployment environment.');
+  logger.error({ message: 'FATAL: Missing required environment variables', missing: missingVars });
   process.exit(1);
 }
 
@@ -106,7 +105,11 @@ if (process.env.NODE_ENV === 'production') {
 
     if (req.headers['x-forwarded-proto'] !== 'https') {
       if (isValidHost) {
-        return res.redirect(`https://${host}${req.url}`);
+        // Use only the server's own known-good origin — never the raw request Host header —
+        // to prevent open redirect (CWE-601 / SonarQube S5146).
+        const safeBase = process.env.CLIENT_URL || `https://${process.env.HOST || 'localhost'}`;
+        const safeUrl = new URL(req.url, safeBase);
+        return res.redirect(301, safeUrl.toString());
       } else {
         logger.warn({ message: 'Blocked suspicious HTTP redirect attempt for invalid host', host: String(host).replace(/[\n\r]/g, '_') });
         return res.status(400).send('Bad Request: Invalid Host Header');
