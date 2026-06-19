@@ -57,7 +57,7 @@ const updateProfile = async (req, res, next) => {
 
     if (!user) return next(new AppError('User not found', 404));
 
-    logger.info(`Profile updated for user ${user.email.replace(/(.{2}).*(@.*)/, '$1***$2')}`);
+    logger.info({ message: 'Profile updated', email: user.email.replace(/(.{2}).*(@.*)/, '$1***$2') });
 
     res.json({
       success: true,
@@ -113,7 +113,7 @@ const requestEmailChange = async (req, res, next) => {
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:5174';
     const verifyLink = `${clientUrl}/profile/verify-email?token=${token}`;
 
-    logger.info(`Email change requested for ${user.email} -> ${user.pendingEmail}`);
+    logger.info({ message: 'Email change requested', from: user.email.replace(/(.{2}).*(@.*)/, '$1***$2'), to: user.pendingEmail.replace(/(.{2}).*(@.*)/, '$1***$2') });
 
     try {
       const { getEmailChangeTemplate } = require('../utils/emailTemplates');
@@ -124,7 +124,7 @@ const requestEmailChange = async (req, res, next) => {
         html: getEmailChangeTemplate(verifyLink)
       });
     } catch (emailErr) {
-      logger.error(`Error sending email change verification: ${emailErr.message}`);
+      logger.error({ message: 'Error sending email change verification', error: emailErr.message });
     }
 
     res.json({
@@ -171,7 +171,7 @@ const verifyEmailChange = async (req, res, next) => {
 
     await user.save();
 
-    logger.info(`Email successfully changed for user ${user._id}`);
+    logger.info({ message: 'Email successfully changed', userId: String(user._id) });
 
     res.json({
       success: true,
@@ -231,7 +231,7 @@ const changePassword = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(newPassword, salt);
     await User.updateOne({ _id: user._id }, { $set: { password: hashedPassword } });
 
-    logger.info(`Password ${hadPassword ? 'changed' : 'set'} for user ${user._id}`);
+    logger.info({ message: hadPassword ? 'Password changed' : 'Password set', userId: String(user._id) });
 
     const token = generateToken(user._id);
 
@@ -287,22 +287,22 @@ const deleteAccount = async (req, res, next) => {
       const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
       try {
         await clerkClient.users.deleteUser(req.user.clerkUserId);
-        logger.info(`User ${req.user.clerkUserId} deleted from Clerk`);
+        logger.info({ message: 'User deleted from Clerk', clerkUserId: String(req.user.clerkUserId) });
       } catch (clerkDelErr) {
-        logger.error(`Failed to delete user from Clerk: ${clerkDelErr.message}`);
+        logger.error({ message: 'Failed to delete user from Clerk', error: clerkDelErr.message });
         // We proceed with local deletion even if Clerk deletion fails to avoid keeping orphaned local data.
       }
     }
 
     // Delete all associated data
     const deletedResumes = await Resume.deleteMany({ userId: user._id });
-    logger.info(`Deleted ${deletedResumes.deletedCount} resume(s) for user ${user._id}`);
+    logger.info({ message: 'Resumes deleted', count: deletedResumes.deletedCount, userId: String(user._id) });
 
     const deletedReports = await AnalysisReport.deleteMany({ userId: user._id });
-    logger.info(`Deleted ${deletedReports.deletedCount} analysis report(s) for user ${user._id}`);
+    logger.info({ message: 'Analysis reports deleted', count: deletedReports.deletedCount, userId: String(user._id) });
 
     await User.findByIdAndDelete(user._id);
-    logger.info(`Account permanently deleted: user ${user._id}`);
+    logger.info({ message: 'Account permanently deleted', userId: String(user._id) });
 
     res.json({
       success: true,

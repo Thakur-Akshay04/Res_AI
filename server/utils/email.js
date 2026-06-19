@@ -10,13 +10,12 @@ const sendEmail = async (options) => {
 
   if (!hasSMTPConfig) {
     logger.warn('Email SMTP settings are not fully configured. Email was not sent through real mailer.');
-    logger.info(`[EMAIL LOG MOCK]
-=========================================
-TO: ${options.email}
-SUBJECT: ${options.subject}
-MESSAGE:
-${options.message}
-=========================================`);
+    logger.info({
+      message: '[EMAIL LOG MOCK] Email not sent — SMTP not configured',
+      to: String(options.email).replace(/(.{2}).*(@.*)/, '$1***$2'),
+      subject: String(options.subject).replace(/[\n\r]/g, '_'),
+      body: String(options.message).replace(/[\n\r]/g, ' ')
+    });
     return { success: false, mock: true };
   }
 
@@ -40,10 +39,10 @@ ${options.message}
     };
 
     const info = await transporter.sendMail(mailOptions);
-    logger.info(`Email sent successfully: ${info.messageId}`);
+    logger.info({ message: 'Email sent successfully', messageId: String(info.messageId) });
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    logger.error('Failed to send email: ' + error.message, error);
+    logger.error({ message: 'Failed to send email', error: error.message });
     throw error;
   }
 };

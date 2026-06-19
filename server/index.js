@@ -87,7 +87,7 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 } else {
   app.use(morgan('combined', {
-    stream: { write: (message) => logger.info(message.trim()) }
+    stream: { write: (message) => logger.info({ message: message.trim() }) }
   }));
 }
 
@@ -108,7 +108,7 @@ if (process.env.NODE_ENV === 'production') {
       if (isValidHost) {
         return res.redirect(`https://${host}${req.url}`);
       } else {
-        logger.warn(`Blocked suspicious HTTP redirect attempt for invalid host: ${host}`);
+        logger.warn({ message: 'Blocked suspicious HTTP redirect attempt for invalid host', host: String(host).replace(/[\n\r]/g, '_') });
         return res.status(400).send('Bad Request: Invalid Host Header');
       }
     }
@@ -142,14 +142,14 @@ const connectDB = async () => {
   while (attempts < maxRetries) {
     try {
       attempts++;
-      logger.info(`Connecting to MongoDB... (Attempt ${attempts}/${maxRetries})`);
+      logger.info({ message: 'Connecting to MongoDB...', attempt: attempts, maxRetries });
       await mongoose.connect(process.env.MONGO_URI);
       logger.info('MongoDB connected successfully');
       return;
     } catch (error) {
-      logger.warn(`MongoDB connection attempt ${attempts} failed: ${error.message}`);
+      logger.warn({ message: 'MongoDB connection attempt failed', attempt: attempts, error: error.message });
       if (attempts < maxRetries) {
-        logger.info(`Retrying in ${retryInterval / 1000} seconds...`);
+        logger.info({ message: 'Retrying connection', retryInSeconds: retryInterval / 1000 });
         await new Promise((resolve) => setTimeout(resolve, retryInterval));
       }
     }
@@ -165,7 +165,7 @@ const connectDB = async () => {
       logger.info('Connected to in-memory MongoDB (development only)');
       logger.info('⚠ Data will be lost when server restarts. Set MONGO_URI in .env for persistence.');
     } catch (memError) {
-      logger.error('Failed to start in-memory MongoDB:', memError.message);
+      logger.error({ message: 'Failed to start in-memory MongoDB', error: memError.message });
       process.exit(1);
     }
   } else {
@@ -178,21 +178,21 @@ if (process.env.NODE_ENV !== 'test') {
   connectDB().then(() => {
     const startServer = (port) => {
       const server = app.listen(port, () => {
-        logger.info(`Server running on port ${port} in ${process.env.NODE_ENV || 'development'} mode`);
+        logger.info({ message: 'Server running', port, env: process.env.NODE_ENV || 'development' });
       });
       server.on('error', (err) => {
         if (err.code === 'EADDRINUSE') {
-          logger.warn(`Port ${port} is already in use, trying port ${port + 1}...`);
+          logger.warn({ message: 'Port already in use, retrying on next port', port, nextPort: port + 1 });
           startServer(port + 1);
         } else {
-          logger.error('Server error:', err.message);
+          logger.error({ message: 'Server error', error: err.message });
           process.exit(1);
         }
       });
 
       // Graceful shutdown: close active connections and database before exiting
       const gracefulShutdown = (signal) => {
-        logger.info(`${signal} received — shutting down gracefully`);
+        logger.info({ message: 'Signal received, shutting down gracefully', signal: String(signal) });
         server.close(() => {
           logger.info('HTTP server closed');
           mongoose.connection.close(false).then(() => {
