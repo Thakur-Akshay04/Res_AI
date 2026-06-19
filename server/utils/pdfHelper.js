@@ -321,8 +321,8 @@ const generateResumeHTML = (personalInfo, content, template = 'modern', jobTitle
           <!-- Row 2: linkedin, github, address -->
           ${(linkedin || github || address) ? `
           <div style="display:flex;gap:20pt;align-items:center;font-size:12pt;color:#000;">
-            ${linkedinData ? `<span>${ICONS.linkedin}<a href="${esc(linkedinData.url)}" target="_blank">${esc(linkedinData.username)}</a></span>` : ''}
-            ${githubData   ? `<span>${ICONS.github}<a href="${esc(githubData.url)}" target="_blank">${esc(githubData.username)}</a></span>` : ''}
+            ${linkedinData ? `<span>${ICONS.linkedin}<a href="${linkedinData.url}" target="_blank">${esc(linkedinData.username)}</a></span>` : ''}
+            ${githubData   ? `<span>${ICONS.github}<a href="${githubData.url}" target="_blank">${esc(githubData.username)}</a></span>` : ''}
             ${address  ? `<span>${ICONS.pin}${esc(address)}</span>` : ''}
           </div>` : ''}
         </div>
@@ -372,8 +372,8 @@ const generateResumeHTML = (personalInfo, content, template = 'modern', jobTitle
                 </div>
                 <div class="row-right">
                   ${[
-                    proj.github && `<a href="${esc(formatProjectGithubUrl(proj.github))}" target="_blank">GitHub</a>`,
-                    proj.link   && `<a href="${esc(formatExternalUrl(proj.link))}" target="_blank">${proj.link.toLowerCase().includes('github.com') ? 'GitHub' : 'Link'}</a>`,
+                    proj.github && `<a href="${formatProjectGithubUrl(proj.github)}" target="_blank">GitHub</a>`,
+                    proj.link   && `<a href="${formatExternalUrl(proj.link)}" target="_blank">${proj.link.toLowerCase().includes('github.com') ? 'GitHub' : 'Link'}</a>`,
                   ].filter(Boolean).join(' | ')}
                 </div>
               </div>

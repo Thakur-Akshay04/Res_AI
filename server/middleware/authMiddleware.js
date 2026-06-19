@@ -58,7 +58,10 @@ const protect = async (req, res, next) => {
         req.user = { id: user._id, name: user.name, email: user.email };
         return next();
       } catch (jwtErr) {
-        if (process.env.NODE_ENV !== 'test') {
+        // "invalid algorithm" is expected when a Clerk JWT (RS256) falls through
+        // to the local HS256 verifier — not a real error, just token type mismatch.
+        const isExpectedMismatch = jwtErr.message === 'invalid algorithm';
+        if (process.env.NODE_ENV !== 'test' && !isExpectedMismatch) {
           logger.error('Auth Error (both Clerk and local JWT verification failed): ' + jwtErr.message);
         }
         return next(new AppError('Not authorized. Invalid token.', 401));

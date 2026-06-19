@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useAuth } from '@clerk/react';
 import { AlertTriangle, Zap } from 'lucide-react';
 import useAuthStore from '@/stores/authStore';
 import useGroqStore from '@/stores/groqStore';
@@ -21,19 +22,34 @@ const formatCountdown = (ms) => {
 
 const AITokenMeter = () => {
   const token = useAuthStore(state => state.token);
+  const { getToken } = useAuth();
   const { groqStatus, isLoading, lastFetched, fetchGroqStatus } = useGroqStore();
 
   const [countdown, setCountdown] = useState(null);
+
+  // Always fetch a fresh Clerk token before polling to avoid 401s from stale stored tokens.
+  // Clerk rotates session tokens every ~60s, so stored tokens go stale between polls.
+  const fetchWithFreshToken = useCallback(async () => {
+    try {
+      const freshToken = await getToken();
+      if (freshToken) {
+        fetchGroqStatus(freshToken);
+      }
+    } catch {
+      // Fallback to stored token if getToken() fails (e.g. signed out)
+      if (token) fetchGroqStatus(token);
+    }
+  }, [getToken, fetchGroqStatus, token]);
 
   useEffect(() => {
     if (!token) return;
     const isStale = !lastFetched || (Date.now() - lastFetched) > STALE_AFTER_MS;
     if (isStale) {
-      fetchGroqStatus(token);
+      fetchWithFreshToken();
     }
-    const id = setInterval(() => fetchGroqStatus(token), STALE_AFTER_MS);
+    const id = setInterval(fetchWithFreshToken, STALE_AFTER_MS);
     return () => clearInterval(id);
-  }, [token, fetchGroqStatus, lastFetched]);
+  }, [token, fetchWithFreshToken, lastFetched]);
 
   const updateCountdown = useCallback(() => {
     const resetAt = groqStatus?.dailyResetAt;
@@ -45,13 +61,13 @@ const AITokenMeter = () => {
     const remaining = resetTime - Date.now();
     if (remaining <= 0) {
       setCountdown('now');
-      if (remaining > -5000 && token) {
-        fetchGroqStatus(token, true);
+      if (remaining > -5000) {
+        fetchWithFreshToken();
       }
     } else {
       setCountdown(formatCountdown(remaining));
     }
-  }, [groqStatus?.dailyResetAt, token, fetchGroqStatus]);
+  }, [groqStatus?.dailyResetAt, fetchWithFreshToken]);
 
   useEffect(() => {
     updateCountdown();
