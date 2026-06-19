@@ -11,6 +11,16 @@ const sendEmail = require('../utils/email');
 const { generateToken } = require('./authController');
 const { getNextMidnightUTC } = require('../utils/aiHelper');
 
+// Safe O(n) email masker — avoids the ReDoS-prone /(.{2}).*(@.*)/ regex pattern
+// where two overlapping .* quantifiers cause catastrophic backtracking on inputs
+// that contain no '@' character.
+const maskEmail = (email) => {
+  const str = String(email);
+  const atIdx = str.indexOf('@');
+  if (atIdx < 0) return '**';
+  return str.slice(0, Math.min(2, atIdx)) + '***' + str.slice(atIdx);
+};
+
 const updateProfile = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -57,7 +67,7 @@ const updateProfile = async (req, res, next) => {
 
     if (!user) return next(new AppError('User not found', 404));
 
-    logger.info({ message: 'Profile updated', email: user.email.replace(/(.{2}).*(@.*)/, '$1***$2') });
+    logger.info({ message: 'Profile updated', email: maskEmail(user.email) });
 
     res.json({
       success: true,
@@ -113,7 +123,7 @@ const requestEmailChange = async (req, res, next) => {
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:5174';
     const verifyLink = `${clientUrl}/profile/verify-email?token=${token}`;
 
-    logger.info({ message: 'Email change requested', from: user.email.replace(/(.{2}).*(@.*)/, '$1***$2'), to: user.pendingEmail.replace(/(.{2}).*(@.*)/, '$1***$2') });
+    logger.info({ message: 'Email change requested', from: maskEmail(user.email), to: maskEmail(user.pendingEmail) });
 
     try {
       const { getEmailChangeTemplate } = require('../utils/emailTemplates');

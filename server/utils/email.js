@@ -1,6 +1,16 @@
 const nodemailer = require('nodemailer');
 const logger = require('./logger');
 
+// Masks email for safe logging — no regex to avoid ReDoS risk.
+// where two overlapping .* quantifiers cause catastrophic backtracking on inputs
+// that contain no '@' character.
+const maskEmail = (email) => {
+  const str = String(email);
+  const atIdx = str.indexOf('@');
+  if (atIdx < 0) return '**';
+  return str.slice(0, Math.min(2, atIdx)) + '***' + str.slice(atIdx);
+};
+
 const sendEmail = async (options) => {
   const hasSMTPConfig = 
     process.env.SMTP_HOST && 
@@ -12,7 +22,7 @@ const sendEmail = async (options) => {
     logger.warn('Email SMTP settings are not fully configured. Email was not sent through real mailer.');
     logger.info({
       message: '[EMAIL LOG MOCK] Email not sent — SMTP not configured',
-      to: String(options.email).replace(/(.{2}).*(@.*)/, '$1***$2'),
+      to: maskEmail(options.email),
       subject: String(options.subject).replace(/[\n\r]/g, '_'),
       body: String(options.message).replace(/[\n\r]/g, ' ')
     });
