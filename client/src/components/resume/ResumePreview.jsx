@@ -149,7 +149,11 @@ const ResumePreview = ({ personalInfo, jobTitle, content, isGenerating, streamTo
                   />
                   <TwoCol
                     left={<span style={{ fontWeight: 'bold', fontSize: '11pt' }}>{exp.role}{exp.techStack?.length > 0 ? ` | ${exp.techStack.join(', ')}` : ''}</span>}
-                    right={exp.location || null}
+                    right={(exp.locationType || exp.location) ? (
+                      <span style={{ fontSize: '10pt', fontStyle: 'italic' }}>
+                        ({exp.locationType || exp.location})
+                      </span>
+                    ) : null}
                   />
                   {exp.bullets?.length > 0 && (
                     <ul style={bulletListStyle}>

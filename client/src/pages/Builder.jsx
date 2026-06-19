@@ -73,7 +73,7 @@ const Builder = () => {
   ]);
 
   const [experience, setExperience] = useState([
-    { company: '', role: '', duration: '', bullets: [''] }
+    { company: '', role: '', duration: '', locationType: '', bullets: [''] }
   ]);
 
   const [projects, setProjects] = useState([
@@ -193,7 +193,7 @@ const Builder = () => {
   });
 
   const addExperience = () => {
-    setExperience([...experience, { company: '', role: '', duration: '', bullets: [''] }]);
+    setExperience([...experience, { company: '', role: '', duration: '', locationType: '', bullets: [''] }]);
     setActiveExpIdx(experience.length);
   };
   const removeExperience = (idx) => {
@@ -577,8 +577,8 @@ const Builder = () => {
   });
 
   const handleExport = useCallback(async () => {
-    if (!id) {
-      toast.error('Save a version first');
+    if (!id || !resume?.versions || resume.versions.length === 0) {
+      toast.error('Please save a version first');
       return;
     }
 
@@ -627,36 +627,19 @@ const Builder = () => {
         }
       }
 
-      const saveRes = await api.post(`/resumes/${id}/version`, {
-        content: contentToSave,
-        atsScore: atsResult?.overall_score || atsResult?.score || 0,
-        matchedKeywords: atsResult?.matched_keywords || [],
-        missingKeywords: atsResult?.missing_keywords || [],
-        suggestions: atsResult?.suggestions || [],
-        jobDescriptionText: jdText,
-        personalInfo,
-        originalExperience: experience,
-        originalEducation: education,
-        originalProjects: projects,
-        originalCertifications: certifications,
-        originalAchievements: achievements,
-        originalActivities: activities,
-        originalSkills: formSkills,
-        profileType,
-        jobTitle: jobTitle || 'Untitled Position',
-        companyName,
-      });
-
-      const savedVersionNumber = saveRes.data?.data?.versionNumber ||
-        saveRes.data?.data?.versions?.[saveRes.data.data.versions.length - 1]?.versionNumber || 1;
-
-      queryClient.invalidateQueries({ queryKey: ['resume', id] });
-
       const res = await fetch(
-        `${apiUrl}/resume/export/${id}/${savedVersionNumber}?template=modern`,
+        `${apiUrl}/resume/export/${id}/1?template=modern`,
         {
           method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            content: contentToSave,
+            personalInfo,
+            jobTitle: jobTitle || 'Untitled Position'
+          })
         }
       );
 
@@ -702,17 +685,35 @@ const Builder = () => {
       toast.dismiss(loadingToast);
       toast.error(err.response?.data?.message || err.message || 'PDF export failed');
     }
-  }, [id, resume, personalInfo, companyName]);
+  }, [
+    id, resume, personalInfo, companyName, projects, experience, education,
+    certifications, achievements, activities, skills, generatedContent,
+    professionalSummary, codingProfile, jobTitle, atsResult, jdText
+  ]);
 
   const deleteVersionMutation = useMutation({
-    mutationFn: (versionNumber) =>
-      api.delete(`/resumes/${id}/version/${versionNumber}`),
-    onSuccess: (_, versionNumber) => {
-      toast.success(`Version ${versionNumber} deleted`);
+    mutationFn: async (versionNumbers) => {
+      if (Array.isArray(versionNumbers)) {
+        // Run sequentially to prevent Mongoose version key (__v) concurrency conflict errors
+        for (const vNum of versionNumbers) {
+          await api.delete(`/resumes/${id}/version/${vNum}`);
+        }
+        return versionNumbers;
+      } else {
+        await api.delete(`/resumes/${id}/version/${versionNumbers}`);
+        return [versionNumbers];
+      }
+    },
+    onSuccess: (deletedList) => {
+      if (deletedList.length === 1) {
+        toast.success(`Version ${deletedList[0]} deleted`);
+      } else {
+        toast.success(`${deletedList.length} versions deleted`);
+      }
       queryClient.invalidateQueries({ queryKey: ['resume', id] });
       queryClient.invalidateQueries({ queryKey: ['resumes'] });
     },
-    onError: (err) => toast.error(err.response?.data?.message || 'Failed to delete version'),
+    onError: (err) => toast.error(err.response?.data?.message || 'Failed to delete version(s)'),
   });
 
   const visibilityMutation = useMutation({
@@ -990,7 +991,12 @@ const Builder = () => {
                   <span className="text-sm font-medium truncate">
                     {exp.company || exp.role ? `${exp.role || 'Role'} at ${exp.company || 'Company'}` : `Experience ${idx + 1}`}
                   </span>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
+                    {exp.locationType && (
+                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-neu-primary/10 text-neu-primary border border-neu-primary/20 hidden sm:inline">
+                        {exp.locationType}
+                      </span>
+                    )}
                     {experience.length > 1 && (
                       <span onClick={(e) => { e.stopPropagation(); removeExperience(idx); }}
                         className="p-1 text-neu-danger hover:bg-red-50 rounded-lg transition-colors">
@@ -1011,6 +1017,9 @@ const Builder = () => {
                     </div>
                     <input className="neu-input text-sm" placeholder="Duration (e.g., Jan 2022 - Present)" value={exp.duration}
                       onChange={(e) => updateExperience(idx, 'duration', e.target.value)} />
+
+                    <input className="neu-input text-sm" placeholder="Location Type" value={exp.locationType || ''}
+                      onChange={(e) => updateExperience(idx, 'locationType', e.target.value)} />
 
                     <div>
                       <label className="text-xs font-medium text-neu-text-light mb-2 block">Bullet Points</label>

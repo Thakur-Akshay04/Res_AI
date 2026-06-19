@@ -278,19 +278,30 @@ const exportPDF = async (req, res, next) => {
       return next(new AppError('Resume not found', 404));
     }
 
-    const version = resume.versions.find(
-      v => v.versionNumber === parseInt(req.params.versionNumber)
-    );
+    let content = req.body.content;
+    let personalInfo = req.body.personalInfo || resume.personalInfo;
+    let jobTitle = req.body.jobTitle || resume.jobTitle;
+    let versionNumber = 'current';
 
-    if (!version) {
-      return next(new AppError('Version not found', 404));
+    if (!content) {
+      const version = resume.versions.find(
+        v => v.versionNumber === parseInt(req.params.versionNumber)
+      );
+
+      if (!version) {
+        return next(new AppError('Version not found', 404));
+      }
+      content = version.content;
+      personalInfo = resume.personalInfo;
+      jobTitle = resume.jobTitle;
+      versionNumber = `v${version.versionNumber}`;
     }
 
     const template = req.query.template || 'modern';
 
     let pdfBuffer;
     try {
-      pdfBuffer = await generatePDF(resume.personalInfo, version.content, template, resume.jobTitle || '');
+      pdfBuffer = await generatePDF(personalInfo, content, template, jobTitle || '');
     } catch (pdfErr) {
       logger.error('PDF generation failed:', pdfErr.message);
       return res.status(500).json({
@@ -306,11 +317,11 @@ const exportPDF = async (req, res, next) => {
       });
     }
 
-    const nameParts = (resume.personalInfo?.name || 'resume').split(' ');
+    const nameParts = (personalInfo?.name || 'resume').split(' ');
     const firstName = nameParts[0] || 'resume';
     const lastName = nameParts.slice(1).join('_') || '';
     const company = (resume.companyName || 'company').replace(/\s+/g, '_');
-    const filename = `${firstName}${lastName ? '_' + lastName : ''}_${company}_v${version.versionNumber}.pdf`;
+    const filename = `${firstName}${lastName ? '_' + lastName : ''}_${company}_${versionNumber}.pdf`;
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Length', pdfBuffer.length);

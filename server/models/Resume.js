@@ -6,6 +6,7 @@ const experienceItemSchema = new mongoose.Schema({
   company: { type: String, required: true },
   role: { type: String, required: true },
   duration: { type: String, required: true },
+  locationType: { type: String, default: '' },
   bullets: [{ type: String }]
 }, { _id: false });
 
@@ -104,6 +105,7 @@ const resumeSchema = new mongoose.Schema({
     company: String,
     role: String,
     duration: String,
+    locationType: String,
     bullets: [String]
   }],
   originalEducation: [{

@@ -170,12 +170,12 @@ const generateResumeHTML = (personalInfo, content, template = 'modern', jobTitle
 
   /* ── SVG icons (inline, 12px, black fill) ── */
   const ICONS = {
-    phone: `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="black" style="vertical-align:middle;margin-right:3pt;"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1-.24 1.12.37 2.32.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02L6.6 10.8z"/></svg>`,
-    email: `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="black" style="vertical-align:middle;margin-right:3pt;"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>`,
-    globe: `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="black" style="vertical-align:middle;margin-right:3pt;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>`,
-    linkedin: `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="black" style="vertical-align:middle;margin-right:3pt;"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>`,
-    github: `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="black" style="vertical-align:middle;margin-right:3pt;"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>`,
-    pin: `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="black" style="vertical-align:middle;margin-right:3pt;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
+    phone: `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="black" style="display:block;"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1-.24 1.12.37 2.32.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02L6.6 10.8z"/></svg>`,
+    email: `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="black" style="display:block;"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>`,
+    globe: `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="black" style="display:block;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>`,
+    linkedin: `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="black" style="display:block;"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>`,
+    github: `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="black" style="display:block;"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>`,
+    pin: `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="black" style="display:block;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
   };
 
   /* ── HTML escape ── */
@@ -311,19 +311,19 @@ const generateResumeHTML = (personalInfo, content, template = 'modern', jobTitle
       <!-- HEADER -->
       <div class="header">
         <span class="header-name">${esc([name, lastName].filter(Boolean).join(' ')) || 'Your Name'}</span>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:3pt;margin-top:5pt;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4pt;margin-top:5pt;">
           <!-- Row 1: phone, email, website -->
           <div style="display:flex;gap:20pt;align-items:center;font-size:12pt;color:#000;">
-            ${phone   ? `<span>${ICONS.phone}${esc(phone)}</span>` : ''}
-            ${email   ? `<span>${ICONS.email}${esc(email)}</span>` : ''}
-            ${website ? `<span>${ICONS.globe}${esc(website)}</span>` : ''}
+            ${phone   ? `<span style="display:inline-flex;align-items:center;gap:4px;">${ICONS.phone}${esc(phone)}</span>` : ''}
+            ${email   ? `<span style="display:inline-flex;align-items:center;gap:4px;">${ICONS.email}${esc(email)}</span>` : ''}
+            ${website ? `<span style="display:inline-flex;align-items:center;gap:4px;">${ICONS.globe}${esc(website)}</span>` : ''}
           </div>
           <!-- Row 2: linkedin, github, address -->
           ${(linkedin || github || address) ? `
           <div style="display:flex;gap:20pt;align-items:center;font-size:12pt;color:#000;">
-            ${linkedinData ? `<span>${ICONS.linkedin}<a href="${linkedinData.url}" target="_blank">${esc(linkedinData.username)}</a></span>` : ''}
-            ${githubData   ? `<span>${ICONS.github}<a href="${githubData.url}" target="_blank">${esc(githubData.username)}</a></span>` : ''}
-            ${address  ? `<span>${ICONS.pin}${esc(address)}</span>` : ''}
+            ${linkedinData ? `<span style="display:inline-flex;align-items:center;gap:4px;">${ICONS.linkedin}<a href="${linkedinData.url}" target="_blank">${esc(linkedinData.username)}</a></span>` : ''}
+            ${githubData   ? `<span style="display:inline-flex;align-items:center;gap:4px;">${ICONS.github}<a href="${githubData.url}" target="_blank">${esc(githubData.username)}</a></span>` : ''}
+            ${address  ? `<span style="display:inline-flex;align-items:center;gap:4px;">${ICONS.pin}${esc(address)}</span>` : ''}
           </div>` : ''}
         </div>
       </div>
@@ -348,7 +348,7 @@ const generateResumeHTML = (personalInfo, content, template = 'modern', jobTitle
               </div>
               <div class="row-flex">
                 <div class="row-left sub-text bold">${esc(exp.role)}${exp.techStack && exp.techStack.length > 0 ? ` | ${exp.techStack.map(esc).join(', ')}` : ''}</div>
-                ${exp.location ? `<div class="row-right">${esc(exp.location)}</div>` : ''}
+                ${(exp.locationType || exp.location) ? `<div class="row-right" style="font-size:10.5pt;font-style:italic;">(${esc(exp.locationType || exp.location)})</div>` : ''}
               </div>
               ${exp.bullets && exp.bullets.filter(b => b.trim()).length > 0 ? `
                 <ul class="ats-bullets">
