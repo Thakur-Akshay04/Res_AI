@@ -372,8 +372,8 @@ const generateResumeHTML = (personalInfo, content, template = 'modern', jobTitle
                 </div>
                 <div class="row-right">
                   ${[
-                    proj.github && `<a href="${formatProjectGithubUrl(proj.github)}" target="_blank">GitHub</a>`,
-                    proj.link   && `<a href="${formatExternalUrl(proj.link)}" target="_blank">${proj.link.toLowerCase().includes('github.com') ? 'GitHub' : 'Link'}</a>`,
+                    proj.github && `<a href="${formatProjectGithubUrl(proj.github)}" target="_blank" style="text-decoration: underline; font-style: italic;">GitHub</a>`,
+                    proj.link   && `<a href="${formatExternalUrl(proj.link)}" target="_blank" style="text-decoration: underline; font-style: italic;">${proj.link.toLowerCase().includes('github.com') ? 'GitHub' : 'Link'}</a>`,
                   ].filter(Boolean).join(' | ')}
                 </div>
               </div>
