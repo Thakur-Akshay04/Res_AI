@@ -91,6 +91,10 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 if (process.env.NODE_ENV === 'production') {
+  // Statically defined trusted origin — the only authority used in any redirect.
+  // Never derived from req.headers.host or any other user-controlled input (CWE-601 / SonarQube S5146).
+  const TRUSTED_ORIGIN = (process.env.CLIENT_URL || '').replace(/\/$/, '');
+
   app.use((req, res, next) => {
     if (req.path === '/api/health') {
       return next();
@@ -100,20 +104,24 @@ if (process.env.NODE_ENV === 'production') {
       return next();
     }
 
-    // Validate Host header against strict RFC-compliant regex to prevent Host Header Injection/Open Redirect
-    const isValidHost = /^[a-zA-Z0-9.-]+(?::\d+)?$/.test(host);
-
     if (req.headers['x-forwarded-proto'] !== 'https') {
-      if (isValidHost) {
-        // Use only the server's own known-good origin — never the raw request Host header —
-        // to prevent open redirect (CWE-601 / SonarQube S5146).
-        const safeBase = process.env.CLIENT_URL || `https://${process.env.HOST || 'localhost'}`;
-        const safeUrl = new URL(req.url, safeBase);
-        return res.redirect(301, safeUrl.toString());
-      } else {
-        logger.warn({ message: 'Blocked suspicious HTTP redirect attempt for invalid host', host: String(host).replace(/[\n\r]/g, '_') });
-        return res.status(400).send('Bad Request: Invalid Host Header');
+      if (!TRUSTED_ORIGIN) {
+        // CLIENT_URL not configured — reject rather than guess a redirect target.
+        logger.warn({ message: 'HTTPS redirect skipped: CLIENT_URL env var not set' });
+        return res.status(400).send('Bad Request');
       }
+
+      // Build the redirect URL from the statically defined trusted origin only.
+      // req.url carries the path + query; we parse it against the trusted base so
+      // only pathname and search are forwarded — the authority is always TRUSTED_ORIGIN.
+      const parsed = new URL(req.url, TRUSTED_ORIGIN + '/');
+      if (parsed.origin !== TRUSTED_ORIGIN) {
+        // Paranoia check: reject if somehow the resolved origin diverges.
+        logger.warn({ message: 'Blocked redirect with unexpected origin', origin: parsed.origin });
+        return res.status(400).send('Bad Request');
+      }
+
+      return res.redirect(301, parsed.toString());
     }
     next();
   });
